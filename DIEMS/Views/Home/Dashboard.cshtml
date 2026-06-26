@@ -1,0 +1,104 @@
+@model Dictionary<string, object>
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- Critical Alert Banner -->
+<div style="background:linear-gradient(135deg,rgba(255,59,59,0.12),rgba(255,78,0,0.08));border:1px solid rgba(255,59,59,0.3);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;gap:14px;">
+    <div style="width:40px;height:40px;background:rgba(255,59,59,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:pulse-anim 1.5s infinite;">
+        <span style="font-size:20px;">🚨</span>
+    </div>
+    <div style="flex:1;">
+        <div style="font-size:14px;font-weight:700;color:#FF6B6B;margin-bottom:2px;">CRITICAL SYSTEM BROADCAST</div>
+        <div style="font-size:12.5px;color:var(--text-secondary);">Oracle Triggers active. Any disaster update automatically pushes alerts to the Audit Trail. Shelter capacities monitored in real-time.</div>
+    </div>
+</div>
+
+<!-- Quick Stats Row -->
+<div class="quick-stats-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <div class="quick-stat" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); padding: 18px; border-radius: var(--radius-lg);">
+        <div class="qs-label" style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Active Disasters</div>
+        <div class="qs-value" style="font-size: 32px; font-weight: 800; color: var(--status-red); margin: 6px 0;">@Model["ActiveDisasters"]</div>
+        <div class="qs-change" style="font-size: 11px; color: var(--text-secondary);">Ongoing emergency responses</div>
+    </div>
+    <div class="quick-stat" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); padding: 18px; border-radius: var(--radius-lg);">
+        <div class="qs-label" style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Total Registered Victims</div>
+        <div class="qs-value" style="font-size: 32px; font-weight: 800; color: var(--text-highlight); margin: 6px 0;">@Model["TotalVictims"]</div>
+        <div class="qs-change" style="font-size: 11px; color: var(--status-green);">@Model["ShelteredVictims"] currently in shelters</div>
+    </div>
+    <div class="quick-stat" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); padding: 18px; border-radius: var(--radius-lg);">
+        <div class="qs-label" style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Active Responders</div>
+        <div class="qs-value" style="font-size: 32px; font-weight: 800; color: var(--status-green); margin: 6px 0;">@Model["ActiveVolunteers"]</div>
+        <div class="qs-change" style="font-size: 11px; color: var(--text-secondary);">Out of @Model["TotalVolunteers"] total volunteers</div>
+    </div>
+    <div class="quick-stat" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); padding: 18px; border-radius: var(--radius-lg);">
+        <div class="qs-label" style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Estimated Damage</div>
+        <div class="qs-value" style="font-size: 24px; font-weight: 800; color: var(--status-orange); margin: 10px 0 8px 0;">৳ @(Convert.ToDecimal(Model["TotalDamageBDT"]).ToString("N0")) BDT</div>
+        <div class="qs-change" style="font-size: 11px; color: var(--text-secondary);">Calculated via PL/SQL formulas</div>
+    </div>
+</div>
+
+<!-- Double Column Section -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Active Disasters Table -->
+    <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight);">Ongoing Active Disasters</h3>
+            <a asp-controller="Disaster" asp-action="Index" class="btn btn-outline btn-sm" style="text-decoration: none;">View All Database</a>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 12px;">
+                        <th style="padding: 10px 8px;">Event</th>
+                        <th style="padding: 10px 8px;">Severity</th>
+                        <th style="padding: 10px 8px;">Location</th>
+                        <th style="padding: 10px 8px;">Impacted</th>
+                        <th style="padding: 10px 8px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in (List<DIEMS.Models.Disaster>)ViewBag.ActiveDisasters)
+                    {
+                        <tr style="border-bottom: 1px solid var(--border-subtle); font-size: 13.5px; color: var(--text-secondary);">
+                            <td style="padding: 12px 8px; font-weight: 700; color: var(--text-highlight);">
+                                <span style="margin-right:6px;">@d.TypeIcon</span>@d.DisasterName
+                            </td>
+                            <td style="padding: 12px 8px;">
+                                <span style="background: @(d.SeverityColor)22; color: @d.SeverityColor; border: 1px solid @d.SeverityColor; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700;">
+                                    @d.SeverityName
+                                </span>
+                            </td>
+                            <td style="padding: 12px 8px;">@d.District</td>
+                            <td style="padding: 12px 8px;">@d.AffectedPopulation.ToString("N0") pop</td>
+                            <td style="padding: 12px 8px;">
+                                <a asp-controller="Disaster" asp-action="Details" asp-route-id="@d.DisasterId" class="btn btn-outline btn-sm" style="text-decoration: none; padding: 4px 8px; font-size: 11px;">Track</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Operations -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 14px;">Quick Actions</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <a asp-controller="Disaster" asp-action="Create" class="btn btn-primary" style="text-decoration: none; text-align: center; font-size: 13px;">📝 Register New Disaster</a>
+                <a asp-controller="Victim" asp-action="Create" class="btn btn-outline" style="text-decoration: none; text-align: center; font-size: 13px;">👤 Register Displaced Victim</a>
+                <a asp-controller="Resource" asp-action="Index" class="btn btn-outline" style="text-decoration: none; text-align: center; font-size: 13px;">📦 Dispatch Emergency Relief</a>
+            </div>
+        </div>
+
+        <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 10px;">Shelter Occupancy</h3>
+            <div style="font-size: 28px; font-weight: 800; color: var(--status-green);">@Model["TotalAvailableBeds"]</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Available beds across shelters</div>
+            <div style="font-size: 13px; color: var(--text-secondary);">
+                Pending citizen reports: <strong style="color: var(--status-orange);">@Model["PendingIncidents"]</strong>
+            </div>
+        </div>
+    </div>
+</div>

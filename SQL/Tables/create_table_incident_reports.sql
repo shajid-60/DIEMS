@@ -1,0 +1,65 @@
+-- ============================================================
+-- DIEMS — Create Table: INCIDENT_REPORTS
+-- Module: Incident Reporting
+-- Oracle 24.3.1
+-- ============================================================
+
+CREATE TABLE INCIDENT_REPORTS (
+    REPORT_ID        NUMBER PRIMARY KEY,
+    TITLE            VARCHAR2(250) NOT NULL,
+    DESCRIPTION      CLOB          NOT NULL,
+    DISASTER_ID      NUMBER,
+    INCIDENT_TYPE    VARCHAR2(60)  NOT NULL,  -- Casualty, Infrastructure, Resource, Missing, Medical
+    SEVERITY         VARCHAR2(20)  NOT NULL,
+    LOCATION         VARCHAR2(300),
+    DISTRICT         VARCHAR2(100),
+    LATITUDE         NUMBER(10, 6),
+    LONGITUDE        NUMBER(10, 6),
+    REPORTED_BY      NUMBER,                   -- NULL = anonymous citizen report
+    REPORTER_NAME    VARCHAR2(100),            -- For anonymous reports
+    REPORTER_PHONE   VARCHAR2(20),
+    STATUS           VARCHAR2(20)  DEFAULT 'Pending' NOT NULL,
+    VERIFICATION_STATUS VARCHAR2(20) DEFAULT 'Unverified',
+    VERIFIED_BY      NUMBER,
+    VERIFIED_AT      TIMESTAMP,
+    ASSIGNED_TO      NUMBER,
+    RESOLUTION_NOTES CLOB,
+    RESOLVED_AT      TIMESTAMP,
+    CREATED_AT       TIMESTAMP     DEFAULT SYSTIMESTAMP,
+    UPDATED_AT       TIMESTAMP     DEFAULT SYSTIMESTAMP,
+
+    CONSTRAINT FK_RPT_DISASTER
+        FOREIGN KEY (DISASTER_ID)
+        REFERENCES DISASTERS(DISASTER_ID),
+
+    CONSTRAINT FK_RPT_REPORTED_BY
+        FOREIGN KEY (REPORTED_BY)
+        REFERENCES USERS(USER_ID),
+
+    CONSTRAINT FK_RPT_VERIFIED_BY
+        FOREIGN KEY (VERIFIED_BY)
+        REFERENCES USERS(USER_ID),
+
+    CONSTRAINT FK_RPT_ASSIGNED_TO
+        FOREIGN KEY (ASSIGNED_TO)
+        REFERENCES USERS(USER_ID),
+
+    CONSTRAINT CHK_RPT_SEVERITY
+        CHECK (SEVERITY IN ('Critical', 'High', 'Medium', 'Low')),
+
+    CONSTRAINT CHK_RPT_STATUS
+        CHECK (STATUS IN ('Pending', 'Assigned', 'In Progress', 'Resolved', 'Closed', 'Rejected')),
+
+    CONSTRAINT CHK_RPT_VERIFICATION
+        CHECK (VERIFICATION_STATUS IN ('Unverified', 'Verified', 'False Report', 'Duplicate'))
+);
+
+CREATE INDEX IDX_RPT_DISASTER  ON INCIDENT_REPORTS(DISASTER_ID);
+CREATE INDEX IDX_RPT_STATUS    ON INCIDENT_REPORTS(STATUS);
+CREATE INDEX IDX_RPT_SEVERITY  ON INCIDENT_REPORTS(SEVERITY);
+CREATE INDEX IDX_RPT_DISTRICT  ON INCIDENT_REPORTS(DISTRICT);
+CREATE INDEX IDX_RPT_CREATED   ON INCIDENT_REPORTS(CREATED_AT);
+
+COMMENT ON TABLE  INCIDENT_REPORTS                   IS 'Citizen and responder filed incident reports';
+COMMENT ON COLUMN INCIDENT_REPORTS.REPORTED_BY       IS 'NULL for anonymous citizen reports - name stored in REPORTER_NAME';
+COMMENT ON COLUMN INCIDENT_REPORTS.VERIFICATION_STATUS IS 'Verified by admin before action is taken';

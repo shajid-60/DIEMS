@@ -1,0 +1,69 @@
+@model DIEMS.Models.ResourceDistribution
+@{
+    var resource = (DIEMS.Models.Resource)ViewBag.Resource;
+    ViewData["Title"] = "Dispatch - " + resource.ResourceName;
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Inventory</a>
+    <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Dispatch Relief: @resource.ResourceName</h1>
+    <p style="font-size:13px; color:var(--text-muted);">Available Stock: <strong>@resource.AvailableQuantity @resource.Unit</strong> stored at <em>@resource.StorageLocation</em></p>
+</div>
+
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; max-width:600px;">
+    
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div style="background: rgba(255, 59, 59, 0.15); border: 1px solid rgba(255, 59, 59, 0.3); padding: 12px; border-radius: 8px; color: #FF4E00; margin-bottom: 20px; font-size: 13.5px;">
+            <div asp-validation-summary="All"></div>
+        </div>
+    }
+
+    <form method="post" asp-action="Distribute">
+        <input type="hidden" name="ResourceId" value="@resource.ResourceId" />
+
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Dispatch Quantity (@resource.Unit)</label>
+            <input type="number" name="Quantity" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="1" max="@resource.AvailableQuantity" value="10" />
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Destination Shelter (Optional)</label>
+            <select name="ShelterId" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                <option value="">-- Field Operation (No specific shelter) --</option>
+                @foreach (var s in (List<DIEMS.Models.Shelter>)ViewBag.Shelters)
+                {
+                    <option value="@s.ShelterId">@s.ShelterName (@s.District)</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Linked Emergency Disaster</label>
+            <select name="DisasterId" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                <option value="">-- General Relief Operation --</option>
+                @foreach (var d in (List<DIEMS.Models.Disaster>)ViewBag.Disasters)
+                {
+                    <option value="@d.DisasterId">@d.DisasterName (@d.Status)</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Delivery Priority</label>
+            <select name="Priority" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                <option value="Normal">Normal</option>
+                <option value="Low">Low</option>
+                <option value="High">High</option>
+                <option value="Immediate">Immediate / Emergency</option>
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Dispatch Dispatch Notes</label>
+            <textarea name="Notes" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white; height:80px; resize:vertical;" placeholder="e.g. Sent via NGO rescue truck, ETA 2 hours..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="padding:10px 24px; font-size:14px; background:var(--status-green); border-color:var(--status-green);">Dispatch Relief Pack</button>
+    </form>
+</div>

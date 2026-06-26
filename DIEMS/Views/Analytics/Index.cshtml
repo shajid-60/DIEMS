@@ -1,0 +1,178 @@
+@{
+    ViewData["Title"] = "Risk Analytics";
+}
+
+<div style="margin-bottom:24px;">
+    <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Intelligence & Risk Analytics</h1>
+    <p style="font-size:13px; color:var(--text-muted);">Real-time database analytics aggregation and resource stock predictive audits</p>
+</div>
+
+<!-- Charts Grid -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
+    <!-- Disaster Trend Chart -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+        <h3 style="font-size:15px; font-weight:700; color:var(--text-highlight); margin-bottom:16px;">Monthly Disaster Occurrence Frequency</h3>
+        <div style="height:300px; position:relative;">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Resource Stock Levels vs Critical Threshold -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+        <h3 style="font-size:15px; font-weight:700; color:var(--text-highlight); margin-bottom:16px;">Resource Stock Level Percentages vs. Critical Threshold</h3>
+        <div style="height:300px; position:relative;">
+            <canvas id="resourceChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
+    <!-- Healthcare Asset Capacity -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+        <h3 style="font-size:15px; font-weight:700; color:var(--text-highlight); margin-bottom:16px;">Emergency Bed Availability by Hospital</h3>
+        <div style="height:300px; position:relative;">
+            <canvas id="hospitalChart"></canvas>
+        </div>
+    </div>
+
+    <!-- SQL Info Panel -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; display:flex; flex-direction:column; justify-content:center;">
+        <h3 style="font-size:18px; font-weight:800; color:var(--text-highlight); margin-bottom:12px;">Oracle DB Integration Metrics</h3>
+        <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
+            The analytics shown on this page are generated in real-time by querying Oracle database tables and aggregation views. Projections are verified against constraints and PL/SQL procedures.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="background:var(--bg-card); padding:10px 14px; border-radius:6px; border:1px solid var(--border-subtle); display:flex; justify-content:space-between;">
+                <span style="font-size:13px; color:var(--text-secondary);">Ongoing Alerts (Active Triggers)</span>
+                <span style="font-size:13px; font-weight:700; color:var(--status-orange);">ALERT_THRESHOLD_TRG</span>
+            </div>
+            <div style="background:var(--bg-card); padding:10px 14px; border-radius:6px; border:1px solid var(--border-subtle); display:flex; justify-content:space-between;">
+                <span style="font-size:13px; color:var(--text-secondary);">Views Polled</span>
+                <span style="font-size:13px; font-weight:700; color:var(--status-green);">ACTIVE_DISASTERS_VW</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Load Trend Data
+        fetch('/Analytics/GetTrendData')
+            .then(res => res.json())
+            .then(data => {
+                const labels = data.map(x => x.MonthYear);
+                const counts = data.map(x => x.Count);
+                const affected = data.map(x => x.Affected);
+
+                new Chart(document.getElementById('trendChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Disaster Count',
+                                data: counts,
+                                borderColor: '#FF4E00',
+                                backgroundColor: 'rgba(255, 78, 0, 0.1)',
+                                borderWidth: 2,
+                                yAxisID: 'y'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8E9AA8' } },
+                            x: { grid: { display: false }, ticks: { color: '#8E9AA8' } }
+                        },
+                        plugins: {
+                            legend: { labels: { color: '#8E9AA8' } }
+                        }
+                    }
+                });
+            });
+
+        // Load Resource Stock Data
+        fetch('/Analytics/GetResourceLevels')
+            .then(res => res.json())
+            .then(data => {
+                const labels = data.map(x => x.Icon + ' ' + x.CategoryName);
+                const percentages = data.map(x => x.StockPercentage);
+                const thresholds = data.map(x => x.Threshold);
+
+                new Chart(document.getElementById('resourceChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Available Stock Level %',
+                                data: percentages,
+                                backgroundColor: '#2979FF',
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Critical Threshold %',
+                                data: thresholds,
+                                backgroundColor: 'rgba(255, 59, 59, 0.4)',
+                                borderRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8E9AA8' } },
+                            x: { grid: { display: false }, ticks: { color: '#8E9AA8' } }
+                        },
+                        plugins: {
+                            legend: { labels: { color: '#8E9AA8' } }
+                        }
+                    }
+                });
+            });
+
+        // Load Hospital Data
+        fetch('/Analytics/GetHospitalStats')
+            .then(res => res.json())
+            .then(data => {
+                const labels = data.map(x => x.HospitalName);
+                const capacity = data.map(x => x.BedsCapacity);
+                const available = data.map(x => x.BedsAvailable);
+
+                new Chart(document.getElementById('hospitalChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Total Capacity',
+                                data: capacity,
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Available Beds',
+                                data: available,
+                                backgroundColor: '#00E676',
+                                borderRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8E9AA8' } },
+                            x: { grid: { display: false }, ticks: { color: '#8E9AA8' } }
+                        },
+                        plugins: {
+                            legend: { labels: { color: '#8E9AA8' } }
+                        }
+                    }
+                });
+            });
+    </script>
+}

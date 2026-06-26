@@ -1,0 +1,52 @@
+-- ============================================================
+-- DIEMS — Create Table: VOLUNTEER_ASSIGNMENTS
+-- Module: Volunteer Management
+-- Oracle 24.3.1
+-- ============================================================
+
+CREATE TABLE VOLUNTEER_ASSIGNMENTS (
+    ASSIGNMENT_ID    NUMBER PRIMARY KEY,
+    VOLUNTEER_ID     NUMBER        NOT NULL,
+    DISASTER_ID      NUMBER        NOT NULL,
+    TASK_TITLE       VARCHAR2(200) NOT NULL,
+    TASK_DESCRIPTION CLOB,
+    LOCATION         VARCHAR2(300),
+    SHELTER_ID       NUMBER,                   -- If assigned to a shelter
+    STATUS           VARCHAR2(20)  DEFAULT 'Active'   NOT NULL,
+    PRIORITY         VARCHAR2(20)  DEFAULT 'Normal',
+    START_DATE       TIMESTAMP     DEFAULT SYSTIMESTAMP,
+    END_DATE         TIMESTAMP,
+    ASSIGNED_BY      NUMBER        NOT NULL,
+    COMPLETION_NOTES CLOB,
+    RATING           NUMBER(2,1),              -- Rating given by supervisor 1.0 - 5.0
+    CREATED_AT       TIMESTAMP     DEFAULT SYSTIMESTAMP,
+
+    CONSTRAINT FK_VA_VOLUNTEER
+        FOREIGN KEY (VOLUNTEER_ID)
+        REFERENCES VOLUNTEERS(VOLUNTEER_ID),
+
+    CONSTRAINT FK_VA_DISASTER
+        FOREIGN KEY (DISASTER_ID)
+        REFERENCES DISASTERS(DISASTER_ID),
+
+    CONSTRAINT FK_VA_SHELTER
+        FOREIGN KEY (SHELTER_ID)
+        REFERENCES SHELTERS(SHELTER_ID),
+
+    CONSTRAINT FK_VA_ASSIGNED_BY
+        FOREIGN KEY (ASSIGNED_BY)
+        REFERENCES USERS(USER_ID),
+
+    CONSTRAINT CHK_VA_STATUS
+        CHECK (STATUS IN ('Active', 'Completed', 'Cancelled', 'On Hold')),
+
+    CONSTRAINT CHK_VA_PRIORITY
+        CHECK (PRIORITY IN ('Emergency', 'High', 'Normal', 'Low'))
+);
+
+CREATE INDEX IDX_VA_VOLUNTEER ON VOLUNTEER_ASSIGNMENTS(VOLUNTEER_ID);
+CREATE INDEX IDX_VA_DISASTER  ON VOLUNTEER_ASSIGNMENTS(DISASTER_ID);
+CREATE INDEX IDX_VA_STATUS    ON VOLUNTEER_ASSIGNMENTS(STATUS);
+
+COMMENT ON TABLE  VOLUNTEER_ASSIGNMENTS          IS 'Task assignments for deployed volunteers at disaster sites';
+COMMENT ON COLUMN VOLUNTEER_ASSIGNMENTS.RATING   IS 'Performance rating 1.0-5.0 given after assignment completion';

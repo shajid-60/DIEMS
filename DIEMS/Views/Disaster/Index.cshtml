@@ -1,0 +1,61 @@
+@model List<DIEMS.Models.Disaster>
+@{
+    ViewData["Title"] = "Disaster Database";
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+        <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Disaster Database Logs</h1>
+        <p style="font-size:13px; color:var(--text-muted);">Historical and active disaster records registered in the system</p>
+    </div>
+    <a asp-controller="Disaster" asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New Disaster</a>
+</div>
+
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+    <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px;">
+                    <th style="padding:12px 8px;">Event Name</th>
+                    <th style="padding:12px 8px;">Type</th>
+                    <th style="padding:12px 8px;">Severity</th>
+                    <th style="padding:12px 8px;">Region</th>
+                    <th style="padding:12px 8px;">Start Date</th>
+                    <th style="padding:12px 8px;">Status</th>
+                    <th style="padding:12px 8px;">Casualties</th>
+                    <th style="padding:12px 8px;">Financial Est.</th>
+                    <th style="padding:12px 8px; text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Model)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-subtle); font-size:13.5px; color:var(--text-secondary);">
+                        <td style="padding:14px 8px; font-weight:700; color:var(--text-highlight);">@d.DisasterName</td>
+                        <td style="padding:14px 8px;">
+                            <span style="margin-right:6px;">@d.TypeIcon</span>@d.TypeName
+                        </td>
+                        <td style="padding:14px 8px;">
+                            <span style="background: @(d.SeverityColor)22; color: @d.SeverityColor; border: 1px solid @d.SeverityColor; padding: 2px 8px; border-radius: 20px; font-size: 11.5px; font-weight: 700;">
+                                @d.SeverityName
+                            </span>
+                        </td>
+                        <td style="padding:14px 8px;">@d.District, @d.Division</td>
+                        <td style="padding:14px 8px;">@d.StartDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td style="padding:14px 8px;">
+                            <span style="color:@(d.Status == "ACTIVE" ? "var(--status-red)" : d.Status == "MONITORING" ? "var(--status-orange)" : "var(--status-green)"); font-weight:700;">
+                                @d.Status
+                            </span>
+                        </td>
+                        <td style="padding:14px 8px;">@d.Casualties.ToString("N0")</td>
+                        <td style="padding:14px 8px;">৳ @d.EstimatedDamage.ToString("N0")</td>
+                        <td style="padding:14px 8px; text-align:right;">
+                            <a asp-action="Details" asp-route-id="@d.DisasterId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px; margin-right:5px;">Track</a>
+                            <a asp-action="Edit" asp-route-id="@d.DisasterId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px; color:var(--status-orange); border-color:var(--status-orange)33;">Edit</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

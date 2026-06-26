@@ -1,0 +1,56 @@
+@model List<DIEMS.Models.Volunteer>
+@{
+    ViewData["Title"] = "Volunteers";
+}
+
+<div style="margin-bottom:24px;">
+    <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Volunteer Directory</h1>
+    <p style="font-size:13px; color:var(--text-muted);">Registered volunteers helping in emergency missions and logistics distributions</p>
+</div>
+
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+    <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px;">
+                    <th style="padding:12px 8px;">Volunteer Name</th>
+                    <th style="padding:12px 8px;">Contact Phone</th>
+                    <th style="padding:12px 8px;">Special Skill Sets</th>
+                    <th style="padding:12px 8px;">Region</th>
+                    <th style="padding:12px 8px;">Hours Served</th>
+                    <th style="padding:12px 8px;">Availability</th>
+                    <th style="padding:12px 8px;">Current Mission</th>
+                    <th style="padding:12px 8px; text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var v in Model)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-subtle); font-size:13.5px; color:var(--text-secondary);">
+                        <td style="padding:14px 8px; font-weight:700; color:var(--text-highlight);">
+                            @v.FullName
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:normal;">Username: @v.Username | Blood: @(v.BloodGroup ?? "—")</div>
+                        </td>
+                        <td style="padding:14px 8px;">@v.Phone</td>
+                        <td style="padding:14px 8px;">
+                            <span style="background:rgba(255, 78, 0, 0.08); color:var(--status-orange); padding:2px 8px; border-radius:4px; font-size:12px; font-weight:600; border:1px solid rgba(255, 78, 0, 0.2);">
+                                @(v.SkillSet ?? "General Relief")
+                            </span>
+                        </td>
+                        <td style="padding:14px 8px;">@v.District</td>
+                        <td style="padding:14px 8px; font-weight:700;">@v.TotalHoursServed hrs</td>
+                        <td style="padding:14px 8px;">
+                            <span style="color:@(v.AvailabilityStatus == "Active" ? "var(--status-green)" : "var(--text-muted)"); font-weight:700;">
+                                @v.AvailabilityStatus
+                            </span>
+                        </td>
+                        <td style="padding:14px 8px; font-style:italic;">@(v.CurrentMission ?? "Idle / Available")</td>
+                        <td style="padding:14px 8px; text-align:right;">
+                            <a asp-action="Details" asp-route-id="@v.VolunteerId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px;">Mission log</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

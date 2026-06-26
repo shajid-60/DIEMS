@@ -1,0 +1,82 @@
+@model List<DIEMS.Models.Hospital>
+@{
+    ViewData["Title"] = "Hospitals & Medical";
+    var requests = (List<DIEMS.Models.MedicalRequest>)ViewBag.Requests;
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+        <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Hospitals & Medical Support</h1>
+        <p style="font-size:13px; color:var(--text-muted);">Emergency bed availability, ICU coordinates, blood stocks, and inter-hospital requests</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register Hospital</a>
+</div>
+
+<!-- Double Column Section -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Hospital Directory -->
+    <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 18px;">Emergency Healthcare Centers</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 12px;">
+                        <th style="padding: 10px 8px;">Hospital Name</th>
+                        <th style="padding: 10px 8px;">Beds (Avail/Max)</th>
+                        <th style="padding: 10px 8px;">ICU (Avail/Max)</th>
+                        <th style="padding: 10px 8px;">Blood Stock (O+/O-/A+)</th>
+                        <th style="padding: 10px 8px; text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var h in Model)
+                    {
+                        <tr style="border-bottom: 1px solid var(--border-subtle); font-size: 13.5px; color: var(--text-secondary);">
+                            <td style="padding: 12px 8px; font-weight: 700; color: var(--text-highlight);">
+                                @h.HospitalName
+                                <div style="font-size:11px; color:var(--text-muted); font-weight:normal;">@h.Address, @h.District</div>
+                            </td>
+                            <td style="padding: 12px 8px;">
+                                <strong style="color:var(--status-green);">@h.AvailableBeds</strong> / @h.CapacityBeds
+                            </td>
+                            <td style="padding: 12px 8px;">
+                                <strong style="color:@(h.AvailableIcu == 0 ? "var(--status-red)" : "var(--status-green)");">@h.AvailableIcu</strong> / @h.CapacityIcu
+                            </td>
+                            <td style="padding: 12px 8px; font-family:var(--font-mono); font-size:12.5px;">
+                                O+: @h.BloodStockOPos | O-: @h.BloodStockONeg | A+: @h.BloodStockAPos
+                            </td>
+                            <td style="padding: 12px 8px; text-align:right;">
+                                <a asp-action="Details" asp-route-id="@h.HospitalId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px;">Manage Staff</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Medical Help Requests -->
+    <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 14px;">Emergency Medical Requests</h3>
+        <div style="display:flex; flex-direction:column; gap:12px; max-height:480px; overflow-y:auto;">
+            @foreach (var req in requests)
+            {
+                <div style="background:var(--bg-card); border:1px solid var(--border-subtle); padding:12px; border-radius:var(--radius-md);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <h6 class="mb-1 text-truncate" style="max-width: 200px;" title="@req.RequestType">@req.RequestType</h6>
+                        <span class="badge bg-@(req.Priority == "Emergency" ? "danger" : req.Priority == "Critical" ? "warning" : "primary") bg-opacity-10 text-@(req.Priority == "Emergency" ? "danger" : req.Priority == "Critical" ? "warning text-dark" : "primary")">
+                            @req.Priority
+                        </span>
+                    </div>
+                    <div class="small text-muted mb-2">
+                        <i class="fa-regular fa-clock me-1"></i>@req.RequestedAt.ToString("MMM dd, HH:mm") &bull; @req.HospitalName
+                    </div>
+                    <div class="small mb-0 text-truncate">
+                        <strong>Need:</strong> @(req.RequestDetails ?? "-") | <strong>Blood:</strong> @(req.BloodGroup ?? "-")
+                    </div>
+                    <div style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono); margin-top:4px;">Requested by: @req.RequestedByName</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

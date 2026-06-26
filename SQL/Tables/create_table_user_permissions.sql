@@ -1,0 +1,22 @@
+-- ============================================================
+-- DIEMS — Create Table: USER_PERMISSIONS
+-- Module: User Management (Junction Table)
+-- Oracle 24.3.1
+-- ============================================================
+
+CREATE TABLE USER_PERMISSIONS (
+    UP_ID         NUMBER PRIMARY KEY,
+    USER_ID       NUMBER NOT NULL,
+    PERMISSION_ID NUMBER NOT NULL,
+    GRANTED_AT    TIMESTAMP DEFAULT SYSTIMESTAMP,
+    GRANTED_BY    NUMBER,
+    CONSTRAINT FK_UP_USER       FOREIGN KEY (USER_ID)
+        REFERENCES USERS(USER_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_UP_PERMISSION FOREIGN KEY (PERMISSION_ID)
+        REFERENCES PERMISSIONS(PERMISSION_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_UP_GRANTED_BY FOREIGN KEY (GRANTED_BY)
+        REFERENCES USERS(USER_ID),
+    CONSTRAINT UQ_USER_PERMISSION UNIQUE (USER_ID, PERMISSION_ID)
+);
+
+COMMENT ON TABLE USER_PERMISSIONS IS 'Maps individual permissions to users (overrides role-level permissions)';

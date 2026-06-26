@@ -1,0 +1,88 @@
+@{
+    ViewData["Title"] = "Shelter Management";
+    var shelters = (List<DIEMS.Models.Shelter>)ViewBag.Shelters;
+    var available = (List<DIEMS.Models.Shelter>)ViewBag.Available;
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+        <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Emergency Shelter Management</h1>
+        <p style="font-size:13px; color:var(--text-muted);">Real-time capacity tracking, victim registration, and overflow support</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New Shelter</a>
+</div>
+
+<!-- Active Available Shelters Panel (Views query) -->
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; margin-bottom:24px;">
+    <h3 style="font-size:15px; font-weight:800; color:var(--status-green); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+        🏠 AVAILABLE SHELTER BEDS (AVAILABLE_SHELTERS_VW View)
+    </h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+        @foreach (var s in available)
+        {
+            <div style="background:var(--bg-card); border:1px solid rgba(0, 230, 118, 0.2); border-radius:var(--radius-md); padding:14px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-size:14px; font-weight:700; color:var(--text-highlight);">@s.ShelterName</div>
+                    <div style="font-size:12px; color:var(--text-muted);">@s.Location, @s.District</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:20px; font-weight:800; color:var(--status-green);">@s.AvailableBeds</div>
+                    <div style="font-size:10px; color:var(--text-muted);">Beds Available</div>
+                </div>
+            </div>
+        }
+        @if (available.Count == 0)
+        {
+            <div style="grid-column: 1 / -1; text-align:center; padding:10px; color:var(--text-muted); font-size:13px;">
+                No shelters with available beds found. All shelters may be at maximum capacity!
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Shelter Directory -->
+<div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
+    <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 18px;">Emergency Shelter Directory</h3>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 12px;">
+                    <th style="padding: 10px 8px;">Shelter Name</th>
+                    <th style="padding: 10px 8px;">Type</th>
+                    <th style="padding: 10px 8px;">Location</th>
+                    <th style="padding: 10px 8px;">Occupancy (Occupied / Max)</th>
+                    <th style="padding: 10px 8px;">Facilities</th>
+                    <th style="padding: 10px 8px; text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in shelters)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-subtle); font-size: 13.5px; color: var(--text-secondary);">
+                        <td style="padding: 12px 8px; font-weight: 700; color: var(--text-highlight);">@s.ShelterName</td>
+                        <td style="padding: 12px 8px;">@s.ShelterType</td>
+                        <td style="padding: 12px 8px; font-size:12.5px;">@s.Location, @s.District</td>
+                        <td style="padding: 12px 8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <strong style="color:@(s.CurrentOccupied >= s.MaxCapacity ? "var(--status-red)" : "var(--text-highlight)");">
+                                    @s.CurrentOccupied
+                                </strong>
+                                <span style="color:var(--text-muted);">/ @s.MaxCapacity</span>
+                                @if (s.HasOverflow == 1)
+                                {
+                                    <span style="font-size:10px; background:var(--status-orange)22; color:var(--status-orange); padding:1px 6px; border-radius:10px; font-weight:700;">Overflow</span>
+                                }
+                            </div>
+                        </td>
+                        <td style="padding: 12px 8px; font-size:12px; color:var(--text-muted);">
+                            @s.Facilities
+                        </td>
+                        <td style="padding: 12px 8px; text-align:right;">
+                            <a asp-action="Details" asp-route-id="@s.ShelterId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px;">Manage Residents</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

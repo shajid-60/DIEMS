@@ -1,0 +1,188 @@
+@model DIEMS.Models.Victim
+@{
+    ViewData["Title"] = "Victim Info - " + Model.FullName;
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Registry</a>
+    <h1 style="font-size:26px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Victim Record: @Model.FullName</h1>
+    <p style="font-size:13px; color:var(--text-muted);">Registered by @Model.RegisteredByName on @Model.RegisteredAt.ToString("yyyy-MM-dd HH:mm")</p>
+</div>
+
+<div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px; margin-bottom:24px;">
+    <!-- Details Panel -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Personal Information</h3>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">National ID (NID)</div>
+                <div style="font-size:14px; font-weight:700; color:var(--text-highlight);">@(Model.Nid ?? "Not Recorded")</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Age / Gender</div>
+                <div style="font-size:14px; color:var(--text-highlight);">@(Model.Age?.ToString() ?? "N/A") years / @Model.Gender</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Blood Group</div>
+                <div style="font-size:14px; font-family:var(--font-mono); font-weight:700; color:var(--text-highlight);">@(Model.BloodGroup ?? "Not Recorded")</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Phone Number</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@(Model.Phone ?? "None")</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Emergency Contact</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@(Model.EmergencyContact ?? "None")</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Pre-disaster Address</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.Address, @Model.District</div>
+            </div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Operational Details</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Linked Disaster</div>
+                <div style="font-size:14px; font-weight:700; color:var(--text-highlight);">@Model.DisasterName</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Medical Condition</div>
+                <div style="font-size:14px; font-weight:700; color:@(Model.MedicalCondition == "Critical" ? "var(--status-red)" : Model.MedicalCondition == "Stable" ? "var(--status-green)" : "var(--status-orange)");">@Model.MedicalCondition</div>
+            </div>
+        </div>
+        
+        @if (!string.IsNullOrEmpty(Model.Notes))
+        {
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-top:20px; margin-bottom:10px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Officer Field Notes</h3>
+            <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; background:var(--bg-card); padding:12px; border-radius:6px; border:1px solid var(--border-subtle);">@Model.Notes</p>
+        }
+    </div>
+
+    <!-- Shelter Allocation Control Card -->
+    <div style="display:flex; flex-direction:column; gap:20px;">
+        <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; text-align:center;">
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:12px;">Shelter Allocation</h3>
+            
+            <div style="font-size:32px; margin-bottom:10px;">🏠</div>
+            <div style="font-size:15px; font-weight:700; color:var(--text-highlight); margin-bottom:4px;">@Model.ShelterName</div>
+            <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:16px;">Status: <strong>@Model.Status</strong></div>
+            
+            @if (Model.ShelterId == null)
+            {
+                <form method="post" asp-controller="Victim" asp-action="Edit">
+                    <input type="hidden" name="VictimId" value="@Model.VictimId" />
+                    <input type="hidden" name="FullName" value="@Model.FullName" />
+                    <input type="hidden" name="Gender" value="@Model.Gender" />
+                    <input type="hidden" name="DisasterId" value="@Model.DisasterId" />
+                    <input type="hidden" name="MedicalCondition" value="@Model.MedicalCondition" />
+                    <input type="hidden" name="Status" value="Sheltered" />
+                    
+                    <button type="submit" class="btn btn-primary" style="width:100%;">
+                        Run Automated Shelter Allocation
+                    </button>
+                </form>
+                <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">Runs ALLOCATE_SHELTER PL/SQL fallback procedure based on proximity and bed availability.</p>
+            }
+            else
+            {
+                <span style="color:var(--status-green); font-size:13px; font-weight:700;">✓ Sheltered successfully</span>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Family Dependency Management -->
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; margin-bottom:24px;">
+    <h3 style="font-size:18px; font-weight:800; color:var(--text-highlight); margin-bottom:16px;">Accompanying Family Dependencies</h3>
+
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+        <!-- Family List -->
+        <div>
+            <table style="width:100%; border-collapse:collapse; text-align:left;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px;">
+                        <th style="padding:10px 8px;">Full Name</th>
+                        <th style="padding:10px 8px;">Relationship</th>
+                        <th style="padding:10px 8px;">Age / Gender</th>
+                        <th style="padding:10px 8px;">Phone</th>
+                        <th style="padding:10px 8px;">Accompanying</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var member in (List<DIEMS.Models.FamilyMember>)ViewBag.FamilyMembers)
+                    {
+                        <tr style="border-bottom:1px solid var(--border-subtle); font-size:13px; color:var(--text-secondary);">
+                            <td style="padding:12px 8px; font-weight:700; color:var(--text-highlight);">@member.FullName</td>
+                            <td style="padding:12px 8px;">@member.Relation</td>
+                            <td style="padding:12px 8px;">@(member.Age?.ToString() ?? "—") / @member.Gender</td>
+                            <td style="padding:12px 8px;">@member.Phone</td>
+                            <td style="padding:12px 8px; font-weight:700; color:@(member.IsSeparated == 0 ? "var(--status-green)" : "var(--status-red)");">
+                                @(member.IsSeparated == 0 ? "Yes" : "No")
+                            </td>
+                        </tr>
+                    }
+                    @if (((List<DIEMS.Models.FamilyMember>)ViewBag.FamilyMembers).Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" style="padding:20px; text-align:center; color:var(--text-muted);">No accompanying family members registered. Add below.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add Family Member Form -->
+        <div style="background:var(--bg-card); border:1px solid var(--border-subtle); padding:16px; border-radius:var(--radius-md);">
+            <h4 style="font-size:14px; font-weight:700; color:var(--text-highlight); margin-bottom:12px;">Add Family Member</h4>
+            <form method="post" asp-action="AddFamilyMember">
+                <input type="hidden" name="VictimId" value="@Model.VictimId" />
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Full Name</label>
+                    <input type="text" name="FullName" required style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Relationship</label>
+                    <select name="Relation" required style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                        <option value="Spouse">Spouse</option>
+                        <option value="Son">Son</option>
+                        <option value="Daughter">Daughter</option>
+                        <option value="Father">Father</option>
+                        <option value="Mother">Mother</option>
+                        <option value="Brother">Brother</option>
+                        <option value="Sister">Sister</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                    <div class="form-group">
+                        <label style="font-size:11px; color:var(--text-muted);">Age</label>
+                        <input type="number" name="Age" style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size:11px; color:var(--text-muted);">Gender</label>
+                        <select name="Gender" style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                            <option value="O">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Phone Number</label>
+                    <input type="text" name="Phone" style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Accompanying?</label>
+                    <select name="IsSeparated" style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                        <option value="0">Yes (Together at camp)</option>
+                        <option value="1">No (Separated)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">Add Family Dependency</button>
+            </form>
+        </div>
+    </div>
+</div>

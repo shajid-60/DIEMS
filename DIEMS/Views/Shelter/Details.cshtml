@@ -1,0 +1,160 @@
+@model DIEMS.Models.Shelter
+@{
+    ViewData["Title"] = Model.ShelterName;
+    var residents = (List<DIEMS.Models.ShelterResident>)ViewBag.Residents;
+    var allVictims = (List<DIEMS.Models.Victim>)ViewBag.AllVictims;
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Shelters</a>
+    <h1 style="font-size:26px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Shelter Command: @Model.ShelterName</h1>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="background: rgba(255, 59, 59, 0.15); border: 1px solid rgba(255, 59, 59, 0.3); padding: 14px; border-radius: 8px; color: #FF4E00; margin-bottom: 24px; font-size: 14px; font-weight: 700;">
+        ⚠️ @TempData["ErrorMessage"]
+    </div>
+}
+
+<div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px; margin-bottom:24px;">
+    <!-- Details Panel -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Capacity Status</h3>
+
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:24px;">
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">MAX CAPACITY</div>
+                <div style="font-size:22px; font-weight:800; color:var(--text-highlight);">@Model.MaxCapacity</div>
+            </div>
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">CURRENTLY OCCUPIED</div>
+                <div style="font-size:22px; font-weight:800; color:@(Model.CurrentOccupied >= Model.MaxCapacity ? "var(--status-red)" : "var(--text-highlight)");">@Model.CurrentOccupied</div>
+            </div>
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">AVAILABLE BEDS</div>
+                <div style="font-size:22px; font-weight:800; color:var(--status-green);">@Model.AvailableBeds</div>
+            </div>
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">RESERVED SPOTS</div>
+                <div style="font-size:22px; font-weight:800; color:var(--status-orange);">@Model.ReservedSpots</div>
+            </div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">General Information</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Location Address</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.Location, @Model.District, @Model.Upazila</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Contact Manager</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.ContactPerson (@Model.ContactPhone)</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Facilities Provided</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.Facilities</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Medical Support Available?</div>
+                <div style="font-size:14px; font-weight:700; color:@(Model.HasMedical == 1 ? "var(--status-green)" : "var(--status-red)");">
+                    @(Model.HasMedical == 1 ? "Yes (Medical Ward Active)" : "No")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check-in Resident Panel -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:14px;">Resident Check-in</h3>
+        
+        <form method="post" asp-action="CheckIn">
+            <input type="hidden" name="ShelterId" value="@Model.ShelterId" />
+
+            <div class="form-group" style="margin-bottom:12px;">
+                <label style="font-size:11px; color:var(--text-muted);">Displaced Victim</label>
+                <select name="VictimId" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                    <option value="">-- Select Displaced Victim --</option>
+                    @foreach (var v in allVictims)
+                    {
+                        @if (v.ShelterId == null && v.Status != "Deceased")
+                        {
+                            <option value="@v.VictimId">@v.FullName (NID: @(v.Nid ?? "N/A"))</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px;">
+                <label style="font-size:11px; color:var(--text-muted);">Assigned Bed / Space Code</label>
+                <input type="text" name="BedNumber" placeholder="e.g. Bed A-12" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+            </div>
+
+            <div class="form-group" style="margin-bottom:16px;">
+                <label style="font-size:11px; color:var(--text-muted);">Check-in Notes</label>
+                <textarea name="Notes" placeholder="Remarks..." style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white; height:60px;"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
+                Check In Resident
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Active Residents Table -->
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+    <h3 style="font-size:18px; font-weight:800; color:var(--text-highlight); margin-bottom:16px;">Current Active Residents</h3>
+    <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px;">
+                    <th style="padding:10px 8px;">Resident Name</th>
+                    <th style="padding:10px 8px;">Bed Number</th>
+                    <th style="padding:10px 8px;">Check-in Date</th>
+                    <th style="padding:10px 8px;">Status</th>
+                    <th style="padding:10px 8px;">Notes</th>
+                    <th style="padding:10px 8px; text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var res in residents)
+                {
+                    <tr style="border-bottom:1px solid var(--border-subtle); font-size:13px; color:var(--text-secondary);">
+                        <td style="padding:12px 8px; font-weight:700; color:var(--text-highlight);">@res.VictimName</td>
+                        <td style="padding:12px 8px; font-family:var(--font-mono);">@(res.BedNumber ?? "Unassigned")</td>
+                        <td style="padding:12px 8px;">@res.CheckInDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td style="padding:12px 8px;">
+                            <span style="color:@(res.Status == "Active" ? "var(--status-green)" : "var(--text-secondary)"); font-weight:700;">
+                                @res.Status
+                            </span>
+                        </td>
+                        <td style="padding:12px 8px; font-size:12px; color:var(--text-muted);">@res.Notes</td>
+                        <td style="padding:12px 8px; text-align:right;">
+                            @if (res.Status == "Active")
+                            {
+                                <form method="post" asp-action="CheckOut" style="display:inline;">
+                                    <input type="hidden" name="srId" value="@res.SrId" />
+                                    <input type="hidden" name="shelterId" value="@Model.ShelterId" />
+                                    <button type="submit" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px; color:var(--status-red); border-color:var(--status-red)33;">
+                                        Check Out
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span style="font-size:11px; color:var(--text-muted);">Discharged</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (residents.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" style="padding:20px; text-align:center; color:var(--text-muted);">No active residents found in this shelter. Check in a resident above.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

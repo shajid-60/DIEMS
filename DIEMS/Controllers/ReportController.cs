@@ -1,0 +1,87 @@
+using System;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using DIEMS.Data;
+using DIEMS.Models;
+
+namespace DIEMS.Controllers
+{
+    public class ReportController : Controller
+    {
+        private readonly ReportRepository _repo;
+        private readonly DisasterRepository _disasterRepo;
+
+        public ReportController(ReportRepository repo, DisasterRepository disasterRepo)
+        {
+            _repo = repo;
+            _disasterRepo = disasterRepo;
+        }
+
+        private bool CheckAuth()
+        {
+            return HttpContext.Session.GetInt32("UserId") != null;
+        }
+
+        [HttpGet]
+        public IActionResult Index()
+        {
+            if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var list = _repo.GetAllReports();
+            ViewBag.AuditLogs = _repo.GetAuditLogs(); // Access audit trail
+            return View(list);
+        }
+
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var r = _repo.GetReportById(id);
+            if (r == null) return NotFound();
+            return View(r);
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            // Allow anyone to create report (even citizens/anonymous public reports)
+            ViewBag.Disasters = _disasterRepo.GetAllDisasters();
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Create(IncidentReport r)
+        {
+            if (ModelState.IsValid)
+            {
+                _repo.InsertReport(r);
+                if (CheckAuth())
+                {
+                    return RedirectToAction("Index");
+                }
+                TempData["Message"] = "Report submitted successfully. Thank you for reporting.";
+                return RedirectToAction("Create");
+            }
+
+            ViewBag.Disasters = _disasterRepo.GetAllDisasters();
+            return View(r);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateStatus(int reportId, string status, string notes)
+        {
+            if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            int userId = HttpContext.Session.GetInt32("UserId") ?? 1;
+
+            var r = new IncidentReport
+            {
+                ReportId = reportId,
+                Status = status,
+                AssignedTo = userId,
+                ResolutionNotes = notes
+            };
+
+            _repo.UpdateReport(r);
+            return RedirectToAction("Details", new { id = reportId });
+        }
+    }
+}

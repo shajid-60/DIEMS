@@ -1,0 +1,179 @@
+@model DIEMS.Models.Disaster
+@{
+    ViewData["Title"] = Model.DisasterName;
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Database</a>
+    <h1 style="font-size:26px; font-weight:800; color:var(--text-highlight); margin-top:8px;">@Model.DisasterName</h1>
+    <span style="background: @(Model.SeverityColor)22; color: @Model.SeverityColor; border: 1px solid @Model.SeverityColor; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display:inline-block; margin-top:5px;">
+        @Model.SeverityName Severity
+    </span>
+</div>
+
+<div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px; margin-bottom:24px;">
+    <!-- Details Panel -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Incident Overview</h3>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px;">
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Event Type</div>
+                <div style="font-size:14px; font-weight:700; color:var(--text-highlight);">@Model.TypeIcon @Model.TypeName</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Current Status</div>
+                <div style="font-size:14px; font-weight:700; color:var(--status-red);">@Model.Status</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Epicenter Location</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.District, @Model.Division (@(Model.Latitude ?? 0), @(Model.Longitude ?? 0))</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Start Date</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.StartDate.ToString("yyyy-MM-dd HH:mm")</div>
+            </div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Impact Statistics</h3>
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:20px;">
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">POPULATION AFFECTED</div>
+                <div style="font-size:18px; font-weight:800; color:var(--text-highlight);">@Model.AffectedPopulation.ToString("N0")</div>
+            </div>
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">CASUALTIES</div>
+                <div style="font-size:18px; font-weight:800; color:var(--status-red);">@Model.Casualties.ToString("N0")</div>
+            </div>
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">DISPLACED</div>
+                <div style="font-size:18px; font-weight:800; color:var(--status-orange);">@Model.Displaced.ToString("N0")</div>
+            </div>
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">TEAMS DEPLOYED</div>
+                <div style="font-size:18px; font-weight:800; color:var(--status-green);">@Model.ResponseTeams</div>
+            </div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:12px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Estimated Financial Damage</h3>
+        <div style="background:rgba(255, 140, 0, 0.08); border:1px solid rgba(255, 140, 0, 0.3); border-radius:var(--radius-md); padding:16px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">PL/SQL Function CALCULATION_DAMAGE Result:</div>
+                <div style="font-size:22px; font-weight:800; color:var(--status-orange);">৳ @Model.EstimatedDamage.ToString("N2") BDT</div>
+            </div>
+            <div style="font-size:12px; font-family:var(--font-mono); color:var(--text-secondary); text-align:right;">
+                Includes human cost + <br/>infrastructure weighting
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-top:20px; margin-bottom:10px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Description</h3>
+            <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6;">@Model.Description</p>
+        }
+    </div>
+
+    <!-- Right Operations Panel -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; display:flex; flex-direction:column; gap:20px;">
+        <div>
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:12px;">Operational Controls</h3>
+            <a asp-action="Edit" asp-route-id="@Model.DisasterId" class="btn btn-outline" style="text-decoration:none; display:block; text-align:center; margin-bottom:10px;">Edit Incident Log</a>
+        </div>
+        
+        <div>
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:6px;">Current Weather</h3>
+            <div style="font-size:14px; color:var(--text-secondary);">⛅ @(Model.WeatherConditions ?? "No records loaded")</div>
+        </div>
+    </div>
+</div>
+
+<!-- Affected Areas Section -->
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; margin-bottom:24px;">
+    <h3 style="font-size:18px; font-weight:800; color:var(--text-highlight); margin-bottom:16px;">Sub-districts / Affected Regions</h3>
+
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+        <!-- Area List -->
+        <div>
+            <table style="width:100%; border-collapse:collapse; text-align:left;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px;">
+                        <th style="padding:10px 8px;">Area / Upazila</th>
+                        <th style="padding:10px 8px;">Severity Score</th>
+                        <th style="padding:10px 8px;">Homeless Pop</th>
+                        <th style="padding:10px 8px;">Accessibility</th>
+                        <th style="padding:10px 8px;">Damage Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var area in (List<DIEMS.Models.AffectedArea>)ViewBag.AffectedAreas)
+                    {
+                        <tr style="border-bottom:1px solid var(--border-subtle); font-size:13px; color:var(--text-secondary);">
+                            <td style="padding:12px 8px; font-weight:700; color:var(--text-highlight);">@area.UnionName (@area.Upazila)</td>
+                            <td style="padding:12px 8px;">
+                                <strong style="color:var(--status-orange);">@(area.AreaKm2 ?? 0) km²</strong>
+                            </td>
+                            <td><i class="fa-solid fa-house-chimney-crack text-danger me-2"></i>@area.PopulationAtRisk.ToString("N0")</td>
+                            <td style="padding:12px 8px;">
+                                @if (area.IsEvacuated == 1)
+                                {
+                                    <span class="badge bg-success bg-opacity-10 text-success"><i class="fa-solid fa-check-circle me-1"></i>Evacuated</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger bg-opacity-10 text-danger"><i class="fa-solid fa-times-circle me-1"></i>Not Evacuated</span>
+                                }
+                            </td>
+                            <td style="padding:12px 8px;">@area.Notes</td>
+                        </tr>
+                    }
+                    @if (((List<DIEMS.Models.AffectedArea>)ViewBag.AffectedAreas).Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" style="padding:20px; text-align:center; color:var(--text-muted);">No affected sub-areas registered. Add below.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add Area Form -->
+        <div style="background:var(--bg-card); border:1px solid var(--border-subtle); padding:16px; border-radius:var(--radius-md);">
+            <h4 style="font-size:14px; font-weight:700; color:var(--text-highlight); margin-bottom:12px;">Add Affected Region</h4>
+            <form method="post" asp-action="AddAffectedArea">
+                <input type="hidden" name="DisasterId" value="@Model.DisasterId" />
+                <input type="hidden" name="District" value="@Model.District" />
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Union Name</label>
+                    <input type="text" name="UnionName" required style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" placeholder="e.g. Tamabil Camp" />
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Upazila / Sub-district</label>
+                    <input type="text" name="Upazila" required style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" placeholder="e.g. Gowainghat" />
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                    <div class="form-group">
+                        <label style="font-size:11px; color:var(--text-muted);">Area (sq km)</label>
+                        <input type="number" step="0.1" name="AreaKm2" required style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" min="1" value="5" />
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size:11px; color:var(--text-muted);">Population At Risk</label>
+                        <input type="number" name="PopulationAtRisk" required style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" min="0" value="0" />
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Evacuation Status</label>
+                    <select name="IsEvacuated" style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                        <option value="1">Evacuated</option>
+                        <option value="0">Not Evacuated</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Damage Notes</label>
+                    <textarea name="Notes" style="padding:6px 10px; font-size:12.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white; height:50px;" placeholder="Bridge collapsed, grid offline..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">Add Area Record</button>
+            </form>
+        </div>
+    </div>
+</div>

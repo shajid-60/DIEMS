@@ -1,0 +1,74 @@
+@model DIEMS.Models.Resource
+@{
+    ViewData["Title"] = "Add Resource Stock";
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Inventory</a>
+    <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Add New Resource / Stock Item</h1>
+</div>
+
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; max-width:600px;">
+    <form method="post" asp-action="Create">
+        
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Resource Name</label>
+            <input type="text" name="ResourceName" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Emergency Rice Packets" />
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Category Type</label>
+            <select name="CategoryId" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                @foreach (var c in (List<DIEMS.Models.ResourceCategory>)ViewBag.Categories)
+                {
+                    <option value="@c.CategoryId">@c.Icon @c.CategoryName (@c.Unit)</option>
+                }
+            </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Total Quantity</label>
+                <input type="number" name="TotalQuantity" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="1" value="100" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Available Quantity</label>
+                <input type="number" name="AvailableQuantity" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="1" value="100" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Unit Cost (BDT)</label>
+                <input type="number" name="UnitCost" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="0" value="50" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Storage Warehouse Location</label>
+                <input type="text" name="StorageLocation" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Sylhet Sadar Warehouse" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Supplier Name</label>
+                <input type="text" name="SupplierName" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. PRAN Foods" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Supplier Contact</label>
+                <input type="text" name="SupplierContact" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. +88017..." />
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Expiration Date</label>
+            <input type="date" name="ExpiryDate" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" />
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Storage Notes / Remarks</label>
+            <textarea name="Notes" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white; height:80px; resize:vertical;"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="padding:10px 24px; font-size:14px;">Restock Inventory</button>
+    </form>
+</div>

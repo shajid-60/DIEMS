@@ -1,0 +1,117 @@
+@model DIEMS.Models.IncidentReport
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report Emergency Incident — DIEMS Public Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/global.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+</head>
+<body class="login-page">
+
+    <div class="alert-ticker">
+        <div class="ticker-label"><span class="pulse-dot"></span> BROADCAST</div>
+        <div class="ticker-content">
+            <span>PUBLIC PORTAL: Submit emergency incidents directly to national responders. False reporting is subject to local laws.</span>
+        </div>
+    </div>
+
+    <div style="display:flex; justify-content:center; align-items:center; min-height:100vh; padding:40px 20px;">
+        <div class="login-card" style="width:100%; max-width:640px; background:rgba(18, 18, 24, 0.85); border:1px solid var(--border-subtle); backdrop-filter:blur(20px); box-shadow:var(--shadow-lg);">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-subtle); padding-bottom:12px;">
+                <div class="brand-text">
+                    <span class="brand-acronym" style="font-size:24px;">🚨 DIEMS</span>
+                    <div style="font-size:11px; color:var(--text-muted);">Emergency Incident Report Portal</div>
+                </div>
+                <a asp-controller="Home" asp-action="Login" style="color:var(--text-muted); font-size:12.5px; text-decoration:none;">Go back to Login Portal</a>
+            </div>
+
+            @if (TempData["Message"] != null)
+            {
+                <div style="background: rgba(0, 230, 118, 0.15); border: 1px solid rgba(0, 230, 118, 0.3); padding: 14px; border-radius: 8px; color: var(--status-green); margin-bottom: 20px; font-size: 13.5px; text-align:center; font-weight:700;">
+                    ✓ @TempData["Message"]
+                </div>
+            }
+
+            <form method="post" asp-controller="Report" asp-action="Create">
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px;">
+                    <div class="form-group">
+                        <label style="font-size:12px; color:var(--text-highlight);">Reporter Full Name</label>
+                        <input type="text" name="ReporterName" required style="padding:10px; font-size:13.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Abdul Karim" />
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size:12px; color:var(--text-highlight);">Reporter Contact Phone</label>
+                        <input type="text" name="ReporterPhone" required style="padding:10px; font-size:13.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. +88017..." />
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px;">
+                    <div class="form-group">
+                        <label style="font-size:12px; color:var(--text-highlight);">Emergency Event Link</label>
+                        <select name="DisasterId" style="padding:10px; font-size:13.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                            <option value="">-- General / Unlinked Incident --</option>
+                            @foreach (var d in (List<DIEMS.Models.Disaster>)ViewBag.Disasters)
+                            {
+                                <option value="@d.DisasterId">@d.DisasterName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size:12px; color:var(--text-highlight);">Incident Category</label>
+                        <select name="IncidentType" required style="padding:10px; font-size:13.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                            <option value="Road Blockage / Flood Damage">Road Blockage / Flood Damage</option>
+                            <option value="Medical Emergency">Medical Emergency</option>
+                            <option value="Missing Person Report">Missing Person Report</option>
+                            <option value="Structural Damage / Collapse">Structural Collapse</option>
+                            <option value="Water / Relief Shortage">Water / Relief Shortage</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px;">
+                    <div class="form-group">
+                        <label style="font-size:12px; color:var(--text-highlight);">District</label>
+                        <input type="text" name="District" required style="padding:10px; font-size:13.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Sylhet" />
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size:12px; color:var(--text-highlight);">Upazila / Sub-district</label>
+                        <input type="text" name="Upazila" style="padding:10px; font-size:13.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Gowainghat" />
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="font-size:12px; color:var(--text-highlight);">Specific Location Details</label>
+                    <input type="text" name="Location" required style="padding:10px; font-size:13.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Salutikar bridge area, highway" />
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="font-size:12px; color:var(--text-highlight);">Urgency Severity Level</label>
+                    <select name="SeverityLevel" style="padding:10px; font-size:13.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                        <option value="Low">Low (No immediate threat)</option>
+                        <option value="Medium">Medium (Attention needed)</option>
+                        <option value="High">High (Serious danger)</option>
+                        <option value="Immediate">Immediate / Critical (Threat to life)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label style="font-size:12px; color:var(--text-highlight);">Description of Emergency / Assistance Required</label>
+                    <textarea name="Description" required style="padding:10px; font-size:13.5px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white; height:90px; resize:vertical;" placeholder="Please describe exactly what happened and what help is needed..."></textarea>
+                </div>
+
+                <button type="submit" class="login-btn" style="background:var(--status-red); border-color:var(--status-red);">
+                    <span class="btn-text">Transmit Emergency Alert</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

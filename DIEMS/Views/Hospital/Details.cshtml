@@ -1,0 +1,160 @@
+@model DIEMS.Models.Hospital
+@{
+    ViewData["Title"] = Model.HospitalName;
+    var doctors = (List<DIEMS.Models.Doctor>)ViewBag.Doctors;
+    var ambulances = (List<DIEMS.Models.Ambulance>)ViewBag.Ambulances;
+    var disasters = (List<DIEMS.Models.Disaster>)ViewBag.Disasters;
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Hospitals</a>
+    <h1 style="font-size:26px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Hospital Operations: @Model.HospitalName</h1>
+</div>
+
+<div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px; margin-bottom:24px;">
+    <!-- Details Panel -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Available Healthcare Assets</h3>
+
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:24px;">
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">BEDS AVAILABLE</div>
+                <div style="font-size:22px; font-weight:800; color:var(--status-green);">@Model.AvailableBeds / @Model.CapacityBeds</div>
+            </div>
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">ICU AVAILABLE</div>
+                <div style="font-size:22px; font-weight:800; color:@(Model.AvailableIcu == 0 ? "var(--status-red)" : "var(--status-green)");">@Model.AvailableIcu / @Model.CapacityIcu</div>
+            </div>
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">BLOOD O+</div>
+                <div style="font-size:22px; font-weight:800; color:var(--text-highlight);">@Model.BloodStockOPos bags</div>
+            </div>
+            <div style="background:var(--bg-card); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); text-align:center;">
+                <div style="font-size:11px; color:var(--text-muted);">BLOOD A+</div>
+                <div style="font-size:22px; font-weight:800; color:var(--text-highlight);">@Model.BloodStockAPos bags</div>
+            </div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">General Information</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Address</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.Address, @Model.District</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Contact Details</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.ContactPhone | @Model.Email</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Help Form -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:14px;">Raise Medical Request</h3>
+        
+        <form method="post" asp-action="RequestMedical">
+            <input type="hidden" name="HospitalId" value="@Model.HospitalId" />
+
+            <div class="form-group" style="margin-bottom:12px;">
+                <label style="font-size:11px; color:var(--text-muted);">Patient Name</label>
+                <input type="text" name="PatientName" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" placeholder="e.g. Robin Mia" />
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px;">
+                <label style="font-size:11px; color:var(--text-muted);">Required Medical Specialty</label>
+                <input type="text" name="RequiredSpecialty" placeholder="e.g. General Surgery" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                <div class="form-group">
+                    <label style="font-size:11px; color:var(--text-muted);">Blood Group</label>
+                    <input type="text" name="BloodGroupNeeded" placeholder="e.g. O-" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+                </div>
+                <div class="form-group">
+                    <label style="font-size:11px; color:var(--text-muted);">Urgency Level</label>
+                    <select name="UrgencyLevel" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                        <option value="Normal">Normal</option>
+                        <option value="High">High</option>
+                        <option value="Immediate">Immediate</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:16px;">
+                <label style="font-size:11px; color:var(--text-muted);">Linked Disaster Event</label>
+                <select name="DisasterId" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                    <option value="">-- General healthcare request --</option>
+                    @foreach (var d in disasters)
+                    {
+                        <option value="@d.DisasterId">@d.DisasterName</option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
+                Submit Medical Request
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Doctors & Ambulances Lists -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+    <!-- Doctors Directory -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+        <h3 style="font-size:18px; font-weight:800; color:var(--text-highlight); margin-bottom:16px;">Assigned Doctors & Duty Status</h3>
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px;">
+                    <th style="padding:10px 8px;">Doctor Name</th>
+                    <th style="padding:10px 8px;">Specialty</th>
+                    <th style="padding:10px 8px;">Status</th>
+                    <th style="padding:10px 8px;">Deployment</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var doc in doctors)
+                {
+                    <tr style="border-bottom:1px solid var(--border-subtle); font-size:13px; color:var(--text-secondary);">
+                        <td style="padding:12px 8px; font-weight:700; color:var(--text-highlight);">@doc.FullName</td>
+                        <td style="padding:12px 8px;">@doc.Specialization</td>
+                        <td style="padding:12px 8px; font-weight:700; color:@(doc.AvailabilityStatus == "Available" ? "var(--status-green)" : "var(--status-orange)");">
+                            @doc.AvailabilityStatus
+                        </td>
+                        <td style="padding:12px 8px; font-size:12.5px;">@doc.DeploymentLocation (Disaster Link: @doc.DisasterName)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Ambulances Directory -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+        <h3 style="font-size:18px; font-weight:800; color:var(--text-highlight); margin-bottom:16px;">Emergency Ambulances</h3>
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px;">
+                    <th style="padding:10px 8px;">Vehicle Code</th>
+                    <th style="padding:10px 8px;">Driver Contact</th>
+                    <th style="padding:10px 8px;">Status</th>
+                    <th style="padding:10px 8px;">Assets</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var amb in ambulances)
+                {
+                    <tr style="border-bottom:1px solid var(--border-subtle); font-size:13px; color:var(--text-secondary);">
+                        <td style="padding:12px 8px; font-weight:700; color:var(--text-highlight);">@amb.VehicleNo</td>
+                        <td style="padding:12px 8px;">@amb.DriverName (@amb.DriverPhone)</td>
+                        <td style="padding:12px 8px; font-weight:700; color:@(amb.Status == "Available" ? "var(--status-green)" : "var(--status-red)");">
+                            @amb.Status
+                        </td>
+                        <td style="padding:12px 8px; font-size:12px; color:var(--text-muted);">
+                            Type: @amb.AmbulanceType
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

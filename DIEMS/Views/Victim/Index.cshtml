@@ -1,0 +1,64 @@
+@model List<DIEMS.Models.Victim>
+@{
+    ViewData["Title"] = "Victim Management";
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+        <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Victim Management Registry</h1>
+        <p style="font-size:13px; color:var(--text-muted);">Displaced citizen tracking, shelter assignment, and medical coordination</p>
+    </div>
+    <a asp-controller="Victim" asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New Victim</a>
+</div>
+
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+    <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px;">
+                    <th style="padding:12px 8px;">Name</th>
+                    <th style="padding:12px 8px;">Age / Gender</th>
+                    <th style="padding:12px 8px;">Blood Group</th>
+                    <th style="padding:12px 8px;">Disaster Link</th>
+                    <th style="padding:12px 8px;">Current Shelter</th>
+                    <th style="padding:12px 8px;">Medical State</th>
+                    <th style="padding:12px 8px;">Status</th>
+                    <th style="padding:12px 8px; text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var v in Model)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-subtle); font-size:13.5px; color:var(--text-secondary);">
+                        <td style="padding:14px 8px; font-weight:700; color:var(--text-highlight);">
+                            @v.FullName
+                            @if (!string.IsNullOrEmpty(v.Nid))
+                            {
+                                <div style="font-size:11px; color:var(--text-muted); font-weight:normal;">NID: @v.Nid</div>
+                            }
+                        </td>
+                        <td style="padding:14px 8px;">@(v.Age?.ToString() ?? "N/A") / @v.Gender</td>
+                        <td style="padding:14px 8px; font-family:var(--font-mono); font-weight:700;">@(v.BloodGroup ?? "—")</td>
+                        <td style="padding:14px 8px;">@v.DisasterName</td>
+                        <td style="padding:14px 8px; font-weight:700; color:@(v.ShelterId != null ? "var(--status-green)" : "var(--status-orange)");">
+                            @v.ShelterName
+                        </td>
+                        <td style="padding:14px 8px;">
+                            <span style="color:@(v.MedicalCondition == "Critical" ? "var(--status-red)" : v.MedicalCondition == "Stable" ? "var(--status-green)" : "var(--status-orange)"); font-weight:700;">
+                                @v.MedicalCondition
+                            </span>
+                        </td>
+                        <td style="padding:14px 8px;">
+                            <span style="background:var(--bg-card); border:1px solid var(--border-subtle); padding:2px 8px; border-radius:12px; font-size:11px; font-weight:700;">
+                                @v.Status
+                            </span>
+                        </td>
+                        <td style="padding:14px 8px; text-align:right;">
+                            <a asp-action="Details" asp-route-id="@v.VictimId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px;">Track Details</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

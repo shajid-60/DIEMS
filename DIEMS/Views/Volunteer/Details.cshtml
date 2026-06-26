@@ -1,0 +1,131 @@
+@model DIEMS.Models.Volunteer
+@{
+    ViewData["Title"] = "Mission Log - " + Model.FullName;
+    var assignments = (List<DIEMS.Models.VolunteerAssignment>)ViewBag.Assignments;
+    var disasters = (List<DIEMS.Models.Disaster>)ViewBag.Disasters;
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Directory</a>
+    <h1 style="font-size:26px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Volunteer Profile: @Model.FullName</h1>
+    <p style="font-size:13px; color:var(--text-muted);">Total Service: <strong>@Model.TotalHoursServed hours</strong> since registration</p>
+</div>
+
+<div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px; margin-bottom:24px;">
+    <!-- Details Panel -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Volunteer Qualifications</h3>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Special Skills</div>
+                <div style="font-size:14px; font-weight:700; color:var(--text-highlight);">@(Model.SkillSet ?? "General Help")</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Duty Availability</div>
+                <div style="font-size:14px; font-weight:700; color:@(Model.AvailabilityStatus == "Active" ? "var(--status-green)" : "var(--text-muted)");">@Model.AvailabilityStatus</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Contact Phone</div>
+                <div style="font-size:14px; color:var(--text-highlight);">@Model.Phone</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Blood Group</div>
+                <div style="font-size:14px; font-family:var(--font-mono); font-weight:700; color:var(--text-highlight);">@(Model.BloodGroup ?? "—")</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Emergency Contact</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@(Model.EmergencyContact ?? "None")</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Primary Region</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.District</div>
+            </div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:12px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Current Assigned Mission</h3>
+        <p style="font-size:14px; font-style:italic; color:var(--text-secondary);">
+            📍 @(Model.CurrentMission ?? "Currently idle / waiting for relief operations dispatch")
+        </p>
+    </div>
+
+    <!-- Dispatch Task Form -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:14px;">Assign Mission Task</h3>
+        
+        <form method="post" asp-action="Assign">
+            <input type="hidden" name="VolunteerId" value="@Model.VolunteerId" />
+
+            <div class="form-group" style="margin-bottom:12px;">
+                <label style="font-size:11px; color:var(--text-muted);">Mission / Disaster Event</label>
+                <select name="DisasterId" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                    @foreach (var d in disasters)
+                    {
+                        <option value="@d.DisasterId">@d.DisasterName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px;">
+                <label style="font-size:11px; color:var(--text-muted);">Task Name</label>
+                <input type="text" name="TaskName" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" placeholder="e.g. Relief Distribution" />
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px;">
+                <label style="font-size:11px; color:var(--text-muted);">Supervisor Name</label>
+                <input type="text" name="SupervisorName" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" placeholder="e.g. Officer Kabir" />
+            </div>
+
+            <div class="form-group" style="margin-bottom:16px;">
+                <label style="font-size:11px; color:var(--text-muted);">Task Details / Directives</label>
+                <textarea name="Description" placeholder="Instructions..." style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white; height:60px;"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
+                Deploy Volunteer
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Mission Assignments History -->
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+    <h3 style="font-size:18px; font-weight:800; color:var(--text-highlight); margin-bottom:16px;">Operational Mission History</h3>
+    <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px;">
+                    <th style="padding:10px 8px;">Task Name</th>
+                    <th style="padding:10px 8px;">Linked Emergency</th>
+                    <th style="padding:10px 8px;">Assigned Date</th>
+                    <th style="padding:10px 8px;">Status</th>
+                    <th style="padding:10px 8px;">Supervisor</th>
+                    <th style="padding:10px 8px;">Directives</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ass in assignments)
+                {
+                    <tr style="border-bottom:1px solid var(--border-subtle); font-size:13px; color:var(--text-secondary);">
+                        <td style="padding:12px 8px; font-weight:700; color:var(--text-highlight);">@ass.TaskName</td>
+                        <td style="padding:12px 8px;">@ass.DisasterName</td>
+                        <td style="padding:12px 8px;">@ass.AssignedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td style="padding:12px 8px;">
+                            <span style="color:@(ass.Status == "Active" ? "var(--status-orange)" : "var(--status-green)"); font-weight:700;">
+                                @ass.Status
+                            </span>
+                        </td>
+                        <td style="padding:12px 8px;">@(ass.SupervisorName ?? "N/A")</td>
+                        <td style="padding:12px 8px; font-size:12px; color:var(--text-muted);">@ass.Description</td>
+                    </tr>
+                }
+                @if (assignments.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" style="padding:20px; text-align:center; color:var(--text-muted);">No missions logged for this volunteer. Assign a mission above.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,85 @@
+@model DIEMS.Models.Hospital
+@{
+    ViewData["Title"] = "Register Hospital";
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Hospitals</a>
+    <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Register Emergency Healthcare Center</h1>
+</div>
+
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; max-width:600px;">
+    <form method="post" asp-action="Create">
+        
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Hospital / Clinic Name</label>
+            <input type="text" name="HospitalName" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Sylhet MAG Osmani Medical College Hospital" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Total Bed Capacity</label>
+                <input type="number" name="CapacityBeds" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="1" value="500" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Available Beds</label>
+                <input type="number" name="AvailableBeds" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="0" value="500" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">ICU Capacity</label>
+                <input type="number" name="CapacityIcu" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="0" value="20" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Available ICU</label>
+                <input type="number" name="AvailableIcu" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="0" value="20" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">District</label>
+                <input type="text" name="District" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Sylhet" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Address Details</label>
+                <input type="text" name="Address" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Medical Road, Sylhet" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Phone Contact</label>
+                <input type="text" name="ContactPhone" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. +88017..." />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Email Address</label>
+                <input type="email" name="Email" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. somch@gov.bd" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:11px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Blood O+ Bags</label>
+                <input type="number" name="BloodStockOPos" value="10" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:11px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Blood O- Bags</label>
+                <input type="number" name="BloodStockONeg" value="5" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:11px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Blood A+ Bags</label>
+                <input type="number" name="BloodStockAPos" value="10" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" />
+            </div>
+        </div>
+
+        <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-bottom:20px;">
+            <input type="checkbox" name="HasSurgery" value="1" style="width:18px; height:18px;" />
+            <label style="font-size:12px; color:var(--text-highlight); cursor:pointer; font-weight:600;">Active Surgery & Emergency Operation Theaters</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="padding:10px 24px; font-size:14px;">Register Center</button>
+    </form>
+</div>

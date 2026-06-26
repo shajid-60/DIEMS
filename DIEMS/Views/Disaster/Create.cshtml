@@ -1,0 +1,104 @@
+@model DIEMS.Models.Disaster
+@{
+    ViewData["Title"] = "Register Disaster";
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Database</a>
+    <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Register Disaster Event</h1>
+</div>
+
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; max-width:800px;">
+    <form method="post" asp-action="Create">
+        
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Event / Disaster Name</label>
+            <input type="text" name="DisasterName" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Sylhet Flash Floods 2026" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Disaster Type</label>
+                <select name="TypeId" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                    @foreach (var t in (List<DIEMS.Models.DisasterType>)ViewBag.Types)
+                    {
+                        <option value="@t.TypeId">@t.Icon @t.TypeName</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Severity Classification</label>
+                <select name="SeverityLevelId" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                    @foreach (var s in (List<DIEMS.Models.SeverityLevel>)ViewBag.SeverityLevels)
+                    {
+                        <option value="@s.LevelId">@s.LevelName (Code @s.LevelCode)</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">District</label>
+                <input type="text" name="District" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Sylhet" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Division</label>
+                <input type="text" name="Division" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Sylhet" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Start Date & Time</label>
+                <input type="datetime-local" name="StartDate" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Status</label>
+                <select name="Status" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="MONITORING">MONITORING</option>
+                    <option value="CONTROLLED">CONTROLLED</option>
+                    <option value="RESOLVED">RESOLVED</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:11px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Affected Pop</label>
+                <input type="number" name="AffectedPopulation" value="0" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:11px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Casualties</label>
+                <input type="number" name="Casualties" value="0" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:11px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Displaced</label>
+                <input type="number" name="Displaced" value="0" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:11px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Rescue Teams</label>
+                <input type="number" name="ResponseTeams" value="0" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Estimated Damage (BDT)</label>
+                <input type="number" name="EstimatedDamage" value="0" step="0.01" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Weather Conditions</label>
+                <input type="text" name="WeatherConditions" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Heavy Rain" />
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Detailed Description</label>
+            <textarea name="Description" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white; height:100px; resize:vertical;"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="padding:10px 24px; font-size:14px;">Submit Incident Log</button>
+    </form>
+</div>

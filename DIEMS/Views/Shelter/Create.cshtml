@@ -1,0 +1,86 @@
+@model DIEMS.Models.Shelter
+@{
+    ViewData["Title"] = "Register Shelter";
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Shelters</a>
+    <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Register Emergency Shelter</h1>
+</div>
+
+<div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; max-width:600px;">
+    <form method="post" asp-action="Create">
+        
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Shelter Name</label>
+            <input type="text" name="ShelterName" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Tamabil Primary School Shelter" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Shelter Target Demographic</label>
+                <select name="ShelterType" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                    <option value="General">General</option>
+                    <option value="Women">Women Only</option>
+                    <option value="Children">Children Only</option>
+                    <option value="Medical">Medical Focus</option>
+                    <option value="Elderly">Elderly Only</option>
+                    <option value="Mixed">Mixed</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Max Bed Capacity</label>
+                <input type="number" name="MaxCapacity" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="1" value="200" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">District</label>
+                <input type="text" name="District" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Sylhet" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Upazila / Sub-district</label>
+                <input type="text" name="Upazila" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Gowainghat" />
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Location Address</label>
+            <input type="text" name="Location" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. College Road, Tamabil" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Contact Person Name</label>
+                <input type="text" name="ContactPerson" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Md. Amin" />
+            </div>
+            <div class="form-group">
+                <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Contact Person Phone</label>
+                <input type="text" name="ContactPhone" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. +88017..." />
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Facilities Provided (Comma-separated)</label>
+            <input type="text" name="Facilities" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" value="Food,Water,Toilets" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:20px;">
+            <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" name="HasMedical" value="1" style="width:18px; height:18px;" />
+                <label style="font-size:12px; color:var(--text-highlight); cursor:pointer;">Medical Ward</label>
+            </div>
+            <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" name="HasGenerator" value="1" style="width:18px; height:18px;" />
+                <label style="font-size:12px; color:var(--text-highlight); cursor:pointer;">Backup Generator</label>
+            </div>
+            <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" name="HasWifi" value="1" style="width:18px; height:18px;" />
+                <label style="font-size:12px; color:var(--text-highlight); cursor:pointer;">Free WiFi</label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="padding:10px 24px; font-size:14px;">Register Shelter</button>
+    </form>
+</div>

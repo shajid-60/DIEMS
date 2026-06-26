@@ -1,0 +1,49 @@
+-- ============================================================
+-- DIEMS — Create Table: SHELTER_RESIDENTS
+-- Module: Shelter Management
+-- Oracle 24.3.1
+-- NOTE: SHELTER_CAP_TRG fires BEFORE INSERT on this table
+-- ============================================================
+
+CREATE TABLE SHELTER_RESIDENTS (
+    SR_ID           NUMBER PRIMARY KEY,
+    SHELTER_ID      NUMBER     NOT NULL,
+    VICTIM_ID       NUMBER     NOT NULL,
+    BED_NUMBER      VARCHAR2(20),
+    CHECK_IN_DATE   TIMESTAMP  DEFAULT SYSTIMESTAMP NOT NULL,
+    CHECK_OUT_DATE  TIMESTAMP,
+    STATUS          VARCHAR2(20) DEFAULT 'Active' NOT NULL,
+    CHECKED_IN_BY   NUMBER,
+    CHECKED_OUT_BY  NUMBER,
+    NOTES           VARCHAR2(500),
+
+    CONSTRAINT FK_SR_SHELTER
+        FOREIGN KEY (SHELTER_ID)
+        REFERENCES SHELTERS(SHELTER_ID),
+
+    CONSTRAINT FK_SR_VICTIM
+        FOREIGN KEY (VICTIM_ID)
+        REFERENCES VICTIMS(VICTIM_ID),
+
+    CONSTRAINT FK_SR_CHECKIN_BY
+        FOREIGN KEY (CHECKED_IN_BY)
+        REFERENCES USERS(USER_ID),
+
+    CONSTRAINT FK_SR_CHECKOUT_BY
+        FOREIGN KEY (CHECKED_OUT_BY)
+        REFERENCES USERS(USER_ID),
+
+    CONSTRAINT CHK_SR_STATUS
+        CHECK (STATUS IN ('Active', 'Discharged', 'Transferred', 'Deceased')),
+
+    CONSTRAINT UQ_SR_ACTIVE_VICTIM
+        UNIQUE (VICTIM_ID, SHELTER_ID, STATUS)   -- Prevent duplicate active registrations
+);
+
+CREATE INDEX IDX_SR_SHELTER  ON SHELTER_RESIDENTS(SHELTER_ID);
+CREATE INDEX IDX_SR_VICTIM   ON SHELTER_RESIDENTS(VICTIM_ID);
+CREATE INDEX IDX_SR_STATUS   ON SHELTER_RESIDENTS(STATUS);
+
+COMMENT ON TABLE  SHELTER_RESIDENTS           IS 'Individual resident records - fires SHELTER_CAP_TRG on INSERT';
+COMMENT ON COLUMN SHELTER_RESIDENTS.BED_NUMBER IS 'Assigned bed or space identifier within the shelter';
+COMMENT ON COLUMN SHELTER_RESIDENTS.STATUS     IS 'Active=currently in shelter, Discharged=left, Transferred=moved';

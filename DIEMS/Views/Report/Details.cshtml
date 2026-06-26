@@ -1,0 +1,85 @@
+@model DIEMS.Models.IncidentReport
+@{
+    ViewData["Title"] = "Report " + Model.ReportId;
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Command Center</a>
+    <h1 style="font-size:26px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Incident Ticket #@Model.ReportId</h1>
+</div>
+
+<div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+    <!-- Details Panel -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Emergency Details</h3>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Reporter</div>
+                <div style="font-size:14px; font-weight:700; color:var(--text-highlight);">@Model.ReporterName (@Model.ReporterPhone)</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Incident Category</div>
+                <div style="font-size:14px; font-weight:700; color:var(--text-highlight);">@Model.IncidentType</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Urgency Severity</div>
+                <div style="font-size:14px; font-weight:700; color:@(Model.SeverityLevel == "Immediate" || Model.SeverityLevel == "High" ? "var(--status-red)" : "var(--text-secondary)");">@Model.SeverityLevel</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Reported At</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.ReportedAt.ToString("yyyy-MM-dd HH:mm")</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Specific Location</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.Location, @Model.District, @Model.Upazila</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted);">Linked Disaster</div>
+                <div style="font-size:14px; color:var(--text-secondary);">@Model.DisasterName</div>
+            </div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:10px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Description of Emergency</h3>
+        <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; background:var(--bg-card); padding:12px; border-radius:6px; border:1px solid var(--border-subtle);">@Model.Description</p>
+
+        @if (!string.IsNullOrEmpty(Model.ResolutionNotes))
+        {
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-top:20px; margin-bottom:10px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Resolution Notes</h3>
+            <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; background:rgba(0, 230, 118, 0.05); padding:12px; border-radius:6px; border:1px solid rgba(0, 230, 118, 0.2);">@Model.ResolutionNotes</p>
+        }
+    </div>
+
+    <!-- Status Control Panel -->
+    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:12px;">Incident Status Control</h3>
+        
+        <div style="margin-bottom:16px;">
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Current Status:</div>
+            <span style="font-size:15px; font-weight:800; color:var(--status-orange);">@Model.Status</span>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Assigned Responder: <strong>@Model.AssignedToName</strong></div>
+        </div>
+
+        <form method="post" asp-action="UpdateStatus">
+            <input type="hidden" name="reportId" value="@Model.ReportId" />
+
+            <div class="form-group" style="margin-bottom:12px;">
+                <label style="font-size:11px; color:var(--text-muted);">Set Status</label>
+                <select name="status" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                    <!option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Pending</!option>
+                    <!option value="Assigned" @(Model.Status == "Assigned" ? "selected" : "")>Assigned</!option>
+                    <!option value="Resolved" @(Model.Status == "Resolved" ? "selected" : "")>Resolved</!option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:16px;">
+                <label style="font-size:11px; color:var(--text-muted);">Action / Resolution Notes</label>
+                <textarea name="notes" placeholder="Enter resolution notes..." style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white; height:80px;">@Model.ResolutionNotes</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
+                Update Ticket Status
+            </button>
+        </form>
+    </div>
+</div>

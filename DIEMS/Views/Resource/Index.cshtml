@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Resource Inventory";
+    var resources = (List<DIEMS.Models.Resource>)ViewBag.Resources;
+    var critical = (List<DIEMS.Models.Resource>)ViewBag.Critical;
+    var distributionLog = (List<DIEMS.Models.ResourceDistribution>)ViewBag.DistributionLog;
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+        <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Emergency Resource Inventory</h1>
+        <p style="font-size:13px; color:var(--text-muted);">Stock level tracking, critical alerts, and logistics distribution</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Add Resource Stock</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="background: rgba(0, 230, 118, 0.15); border: 1px solid rgba(0, 230, 118, 0.3); padding: 14px; border-radius: 8px; color: var(--status-green); margin-bottom: 24px; font-size: 14px; font-weight: 700;">
+        📢 @TempData["SuccessMessage"]
+    </div>
+}
+
+<!-- Critical Low Stock Panel -->
+@if (critical.Count > 0)
+{
+    <div style="background:linear-gradient(135deg,rgba(255,59,59,0.12),rgba(255,140,0,0.08)); border:1px solid rgba(255,59,59,0.3); border-radius:var(--radius-lg); padding:20px; margin-bottom:24px;">
+        <h3 style="font-size:14px; font-weight:800; color:#FF6B6B; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+            ⚠️ CRITICAL LOW STOCK WARNING (ALERT_THRESHOLD_TRG Triggered)
+        </h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+            @foreach (var c in critical)
+            {
+                <div style="background:var(--bg-elevated); border:1px solid rgba(255,59,59,0.2); border-radius:var(--radius-md); padding:12px; display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:22px;">@c.Icon</span>
+                    <div>
+                        <div style="font-size:13.5px; font-weight:700; color:var(--text-highlight);">@c.ResourceName</div>
+                        <div style="font-size:12px; color:var(--text-muted);">
+                            Available: <strong style="color:var(--status-red);">@c.AvailableQuantity.ToString("N0")</strong> / @c.TotalQuantity.ToString("N0") @c.Unit
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- Double Column Section -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Resources List -->
+    <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 18px;">Inventory Status</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 12px;">
+                        <th style="padding: 10px 8px;">Resource</th>
+                        <th style="padding: 10px 8px;">Category</th>
+                        <th style="padding: 10px 8px;">Location</th>
+                        <th style="padding: 10px 8px;">Available / Total</th>
+                        <th style="padding: 10px 8px; text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in resources)
+                    {
+                        <tr style="border-bottom: 1px solid var(--border-subtle); font-size: 13.5px; color: var(--text-secondary);">
+                            <td style="padding: 12px 8px; font-weight: 700; color: var(--text-highlight);">
+                                <span style="margin-right:6px;">@r.Icon</span>@r.ResourceName
+                            </td>
+                            <td style="padding: 12px 8px;">@r.CategoryName</td>
+                            <td style="padding: 12px 8px; font-size: 12.5px;">@r.StorageLocation</td>
+                            <td style="padding: 12px 8px;">
+                                <strong style="color:@(r.AvailableQuantity <= (r.TotalQuantity * r.CriticalThreshold / 100) ? "var(--status-red)" : "var(--status-green)");">
+                                    @r.AvailableQuantity
+                                </strong>
+                                / @r.TotalQuantity @r.Unit
+                            </td>
+                            <td style="padding: 12px 8px; text-align:right;">
+                                <a asp-action="Distribute" asp-route-id="@r.ResourceId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px; border-color:var(--status-green)55; color:var(--status-green);">Dispatch</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Distribution Log -->
+    <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 14px;">Distribution Log</h3>
+        <div style="display:flex; flex-direction:column; gap:12px; max-height:480px; overflow-y:auto;">
+            @foreach (var log in distributionLog)
+            {
+                <div style="background:var(--bg-card); border:1px solid var(--border-subtle); padding:12px; border-radius:var(--radius-md);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span style="font-size:12.5px; font-weight:700; color:var(--text-highlight);">@log.ResourceName</span>
+                        <span style="font-size:11px; background:var(--bg-elevated); padding:2px 6px; border-radius:4px; font-weight:700; color:var(--status-green);">
+                            @log.Quantity Units
+                        </span>
+                    </div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:2px;">Destination: @log.ShelterName</div>
+                    <div style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">Sent: @log.DistributedAt.ToString("MM-dd HH:mm")</div>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:4px; font-style:italic;">Status: @log.Status</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
