@@ -42,7 +42,27 @@
 
 <!-- Shelter Directory -->
 <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
-    <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 18px;">Emergency Shelter Directory</h3>
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:18px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin:0;">Emergency Shelter Directory</h3>
+        <!-- PL/SQL Filter Form -->
+        <form method="get" asp-action="Index" style="display:flex; gap:16px;">
+            <div>
+                <select name="status" class="form-select" style="min-width:130px; font-size:12px; padding:6px 10px;" onchange="this.form.submit()">
+                    <option value="ALL" selected="@(ViewBag.CurrentStatus == "ALL")">All Statuses</option>
+                    <option value="OPEN" selected="@(ViewBag.CurrentStatus == "OPEN")">Open</option>
+                    <option value="CLOSED" selected="@(ViewBag.CurrentStatus == "CLOSED")">Closed</option>
+                    <option value="FULL" selected="@(ViewBag.CurrentStatus == "FULL")">Full Capacity</option>
+                </select>
+            </div>
+            <div>
+                <select name="sort" class="form-select" style="min-width:130px; font-size:12px; padding:6px 10px;" onchange="this.form.submit()">
+                    <option value="LATEST" selected="@(ViewBag.CurrentSort == "LATEST")">Recently Opened</option>
+                    <option value="CAPACITY" selected="@(ViewBag.CurrentSort == "CAPACITY")">Max Capacity (Desc)</option>
+                    <option value="AVAILABLE" selected="@(ViewBag.CurrentSort == "AVAILABLE")">Available Beds (Desc)</option>
+                </select>
+            </div>
+        </form>
+    </div>
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>

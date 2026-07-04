@@ -12,6 +12,28 @@
 </div>
 
 <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+    <!-- PL/SQL Filter Form -->
+    <form method="get" asp-action="Index" style="display:flex; gap:16px; margin-bottom:20px; align-items:flex-end;">
+        <div>
+            <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;">PL/SQL DB Filter (Status)</label>
+            <select name="status" class="form-select" style="min-width:150px; font-size:13px; padding:8px 12px;" onchange="this.form.submit()">
+                <option value="ALL" selected="@(ViewBag.CurrentStatus == "ALL")">All Statuses</option>
+                <option value="Safe" selected="@(ViewBag.CurrentStatus == "Safe")">Safe</option>
+                <option value="Injured" selected="@(ViewBag.CurrentStatus == "Injured")">Injured</option>
+                <option value="Missing" selected="@(ViewBag.CurrentStatus == "Missing")">Missing</option>
+                <option value="Deceased" selected="@(ViewBag.CurrentStatus == "Deceased")">Deceased</option>
+            </select>
+        </div>
+        <div>
+            <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;">DB Sort Order</label>
+            <select name="sort" class="form-select" style="min-width:150px; font-size:13px; padding:8px 12px;" onchange="this.form.submit()">
+                <option value="LATEST" selected="@(ViewBag.CurrentSort == "LATEST")">Latest Registrations</option>
+                <option value="OLDEST" selected="@(ViewBag.CurrentSort == "OLDEST")">Oldest Registrations</option>
+                <option value="AGE" selected="@(ViewBag.CurrentSort == "AGE")">By Age (Ascending)</option>
+            </select>
+        </div>
+    </form>
+
     <div style="overflow-x:auto;">
         <table style="width:100%; border-collapse:collapse; text-align:left;">
             <thead>

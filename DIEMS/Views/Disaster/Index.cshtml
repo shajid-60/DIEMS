@@ -3,17 +3,38 @@
     ViewData["Title"] = "Disaster Database";
 }
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; flex-wrap: wrap; gap: 16px;">
     <div>
         <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Disaster Database Logs</h1>
         <p style="font-size:13px; color:var(--text-muted);">Historical and active disaster records registered in the system</p>
     </div>
-    <a asp-controller="Disaster" asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New Disaster</a>
+    
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <!-- PL/SQL Server Side Filter Form -->
+        <form method="get" asp-action="Index" style="display: flex; gap: 8px; align-items: center; background: var(--bg-card); padding: 6px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <span style="font-size: 11px; font-weight: 700; color: var(--brand-primary); text-transform: uppercase; margin-right: 4px;">PL/SQL Filter</span>
+            <select name="status" class="form-select" style="padding: 6px; font-size: 12px; width: auto;" onchange="this.form.submit()">
+                <option value="ALL" selected="@(ViewBag.CurrentStatus == "ALL")">All Status</option>
+                <option value="ACTIVE" selected="@(ViewBag.CurrentStatus == "ACTIVE")">Active</option>
+                <option value="MONITORING" selected="@(ViewBag.CurrentStatus == "MONITORING")">Monitoring</option>
+                <option value="CONTROLLED" selected="@(ViewBag.CurrentStatus == "CONTROLLED")">Controlled</option>
+                <option value="RESOLVED" selected="@(ViewBag.CurrentStatus == "RESOLVED")">Resolved</option>
+            </select>
+            <select name="sort" class="form-select" style="padding: 6px; font-size: 12px; width: auto;" onchange="this.form.submit()">
+                <option value="LATEST" selected="@(ViewBag.CurrentSort == "LATEST")">Latest First</option>
+                <option value="OLDEST" selected="@(ViewBag.CurrentSort == "OLDEST")">Oldest First</option>
+                <option value="SEVERITY" selected="@(ViewBag.CurrentSort == "SEVERITY")">Highest Severity</option>
+            </select>
+        </form>
+
+        <input type="text" id="disasterSearch" class="form-input" style="padding: 8px 14px; font-size: 13px; width: 200px;" placeholder="JS quick search..." onkeyup="filterDisasterTable()" />
+        <a asp-controller="Disaster" asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New</a>
+    </div>
 </div>
 
 <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
     <div style="overflow-x:auto;">
-        <table style="width:100%; border-collapse:collapse; text-align:left;">
+        <table id="disasterTable" style="width:100%; border-collapse:collapse; text-align:left;">
             <thead>
                 <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px;">
                     <th style="padding:12px 8px;">Event Name</th>
@@ -59,3 +80,29 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function filterDisasterTable() {
+            var input, filter, table, tr, td, i, j, txtValue;
+            input = document.getElementById("disasterSearch");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("disasterTable");
+            tr = table.getElementsByTagName("tr");
+            
+            for (i = 1; i < tr.length; i++) {
+                tr[i].style.display = "none";
+                td = tr[i].getElementsByTagName("td");
+                for (j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+}

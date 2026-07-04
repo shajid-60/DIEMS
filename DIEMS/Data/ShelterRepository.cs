@@ -17,17 +17,39 @@ namespace DIEMS.Data
 
         public List<Shelter> GetAllShelters()
         {
-            var list = new List<Shelter>();
-            string sql = @"
-                SELECT s.*, c.MAX_CAPACITY, c.CURRENT_OCCUPIED, c.AVAILABLE_BEDS, c.RESERVED_SPOTS, c.HAS_OVERFLOW, c.OVERFLOW_LOCATION
-                FROM SHELTERS s
-                LEFT JOIN SHELTER_CAPACITY c ON s.SHELTER_ID = c.SHELTER_ID
-                ORDER BY s.SHELTER_NAME";
+            return GetFilteredShelters("ALL", "LATEST");
+        }
 
-            var dt = _db.ExecuteQuery(sql);
-            foreach (DataRow row in dt.Rows)
+        public List<Shelter> GetFilteredShelters(string status, string sort)
+        {
+            var list = new List<Shelter>();
+            
+            using (var conn = _db.GetConnection())
+            using (var cmd = new OracleCommand("GET_FILTERED_SHELTERS", conn))
             {
-                list.Add(MapShelter(row));
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                var pCursor = new OracleParameter("v_cursor", OracleDbType.RefCursor);
+                pCursor.Direction = System.Data.ParameterDirection.ReturnValue;
+                cmd.Parameters.Add(pCursor);
+
+                var pStatus = new OracleParameter("p_status", OracleDbType.Varchar2);
+                pStatus.Value = string.IsNullOrEmpty(status) ? "ALL" : status;
+                cmd.Parameters.Add(pStatus);
+
+                var pSort = new OracleParameter("p_sort", OracleDbType.Varchar2);
+                pSort.Value = string.IsNullOrEmpty(sort) ? "LATEST" : sort;
+                cmd.Parameters.Add(pSort);
+                
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var dt = new System.Data.DataTable();
+                    dt.Load(reader);
+                    foreach (System.Data.DataRow row in dt.Rows)
+                    {
+                        list.Add(MapShelter(row));
+                    }
+                }
             }
             return list;
         }

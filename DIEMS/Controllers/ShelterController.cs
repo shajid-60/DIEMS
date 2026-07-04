@@ -23,14 +23,15 @@ namespace DIEMS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string status, string sort)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
-            
-            ViewBag.Shelters = _repo.GetAllShelters();
+            var list = _repo.GetFilteredShelters(status, sort);
+            ViewBag.Shelters = list;
             ViewBag.Available = _repo.GetAvailableShelters();
-            
-            return View();
+            ViewBag.CurrentStatus = status ?? "ALL";
+            ViewBag.CurrentSort = sort ?? "LATEST";
+            return View(list);
         }
 
         [HttpGet]
@@ -59,6 +60,9 @@ namespace DIEMS.Controllers
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
             s.CreatedBy = HttpContext.Session.GetInt32("UserId");
+            
+            ModelState.Remove("ShelterId");
+            ModelState.Remove("CreatedAt");
 
             if (ModelState.IsValid)
             {

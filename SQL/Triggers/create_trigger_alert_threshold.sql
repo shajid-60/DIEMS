@@ -1,13 +1,4 @@
--- ============================================================
--- DIEMS — Trigger: ALERT_THRESHOLD_TRG
--- Module: Emergency Resource Management
--- Oracle 24.3.1
---
--- PURPOSE:
---   Monitors resource levels after an update and logs a system-level
---   alert in the AUDIT_LOG if availability drops below the category's
---   critical threshold percentage.
--- ============================================================
+
 
 CREATE OR REPLACE TRIGGER ALERT_THRESHOLD_TRG
 AFTER UPDATE OF AVAILABLE_QUANTITY ON RESOURCES

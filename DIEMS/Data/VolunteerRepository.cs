@@ -17,17 +17,39 @@ namespace DIEMS.Data
 
         public List<Volunteer> GetAllVolunteers()
         {
-            var list = new List<Volunteer>();
-            string sql = @"
-                SELECT v.*, u.USERNAME, u.EMAIL
-                FROM VOLUNTEERS v
-                JOIN USERS u ON v.USER_ID = u.USER_ID
-                ORDER BY v.FULL_NAME";
+            return GetFilteredVolunteers("ALL", "LATEST");
+        }
 
-            var dt = _db.ExecuteQuery(sql);
-            foreach (DataRow row in dt.Rows)
+        public List<Volunteer> GetFilteredVolunteers(string status, string sort)
+        {
+            var list = new List<Volunteer>();
+            
+            using (var conn = _db.GetConnection())
+            using (var cmd = new OracleCommand("GET_FILTERED_VOLUNTEERS", conn))
             {
-                list.Add(MapVolunteer(row));
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                var pCursor = new OracleParameter("v_cursor", OracleDbType.RefCursor);
+                pCursor.Direction = System.Data.ParameterDirection.ReturnValue;
+                cmd.Parameters.Add(pCursor);
+
+                var pStatus = new OracleParameter("p_status", OracleDbType.Varchar2);
+                pStatus.Value = string.IsNullOrEmpty(status) ? "ALL" : status;
+                cmd.Parameters.Add(pStatus);
+
+                var pSort = new OracleParameter("p_sort", OracleDbType.Varchar2);
+                pSort.Value = string.IsNullOrEmpty(sort) ? "LATEST" : sort;
+                cmd.Parameters.Add(pSort);
+                
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var dt = new System.Data.DataTable();
+                    dt.Load(reader);
+                    foreach (System.Data.DataRow row in dt.Rows)
+                    {
+                        list.Add(MapVolunteer(row));
+                    }
+                }
             }
             return list;
         }

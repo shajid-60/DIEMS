@@ -13,28 +13,28 @@
         
         <div class="form-group" style="margin-bottom:16px;">
             <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Full Name</label>
-            <input type="text" name="FullName" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Kalam Mia" />
+            <input type="text" name="FullName" required class="form-input" placeholder="e.g. Kalam Mia" />
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">National ID (NID)</label>
-                <input type="text" name="Nid" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="17-digit or 10-digit number" />
+                <input type="text" name="Nid" class="form-input" placeholder="17-digit or 10-digit number" />
             </div>
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Date of Birth</label>
-                <input type="date" name="DateOfBirth" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" />
+                <input type="date" name="DateOfBirth" class="form-input" />
             </div>
         </div>
 
         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:16px;">
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Age</label>
-                <input type="number" name="Age" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="0" value="30" />
+                <input type="number" name="Age" class="form-input" min="0" value="30" />
             </div>
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Gender</label>
-                <select name="Gender" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                <select name="Gender" class="form-select">
                     <option value="M">Male</option>
                     <option value="F">Female</option>
                     <option value="O">Other</option>
@@ -42,7 +42,7 @@
             </div>
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Blood Group</label>
-                <select name="BloodGroup" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                <select name="BloodGroup" class="form-select">
                     <option value="O+">O+</option>
                     <option value="O-">O-</option>
                     <option value="A+">A+</option>
@@ -58,29 +58,29 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Primary Phone</label>
-                <input type="text" name="Phone" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. +88017..." />
+                <input type="text" name="Phone" class="form-input" placeholder="e.g. +88017..." />
             </div>
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Emergency Contact</label>
-                <input type="text" name="EmergencyContact" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Relative phone" />
+                <input type="text" name="EmergencyContact" class="form-input" placeholder="e.g. Relative phone" />
             </div>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Home Address</label>
-                <input type="text" name="Address" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Village name" />
+                <input type="text" name="Address" class="form-input" placeholder="e.g. Village name" />
             </div>
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">District</label>
-                <input type="text" name="District" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" placeholder="e.g. Sylhet" />
+                <input type="text" name="District" required class="form-input" placeholder="e.g. Sylhet" />
             </div>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Linked Disaster Event</label>
-                <select name="DisasterId" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                <select name="DisasterId" required class="form-select">
                     @foreach (var d in (List<DIEMS.Models.Disaster>)ViewBag.Disasters)
                     {
                         <option value="@d.DisasterId">@d.DisasterName</option>
@@ -89,7 +89,7 @@
             </div>
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Medical Condition</label>
-                <select name="MedicalCondition" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                <select name="MedicalCondition" class="form-select">
                     <option value="Stable">Stable</option>
                     <option value="Minor">Minor</option>
                     <option value="Moderate">Moderate</option>
@@ -101,7 +101,7 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
             <div class="form-group">
                 <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Status</label>
-                <select name="Status" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+                <select name="Status" class="form-select">
                     <option value="Displaced">Displaced (Needs shelter)</option>
                     <option value="Sheltered">Sheltered (Pre-assigned)</option>
                     <option value="Medical">Medical (In hospital)</option>
@@ -118,7 +118,7 @@
 
         <div class="form-group" style="margin-bottom:20px;">
             <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Notes / Special Needs</label>
-            <textarea name="Notes" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white; height:80px; resize:vertical;" placeholder="e.g. Requires wheel chair, diabetic diet..."></textarea>
+            <textarea name="Notes" class="form-textarea" placeholder="e.g. Requires wheel chair, diabetic diet..."></textarea>
         </div>
 
         <button type="submit" class="btn btn-primary" style="padding:10px 24px; font-size:14px;">Register & Process</button>

@@ -25,22 +25,27 @@ namespace DIEMS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string category, string sort)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
             
-            ViewBag.Resources = _repo.GetAllResources();
+            var list = _repo.GetFilteredResources(category, sort);
+            ViewBag.Resources = list;
             ViewBag.Critical = _repo.GetCriticalResources();
             ViewBag.DistributionLog = _repo.GetDistributionLog();
             
-            return View();
+            ViewBag.CurrentCategory = category ?? "ALL";
+            ViewBag.CurrentSort = sort ?? "LATEST";
+            ViewBag.Categories = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_repo.GetResourceCategories(), "CategoryName", "CategoryName");
+            
+            return View(list);
         }
 
         [HttpGet]
         public IActionResult Create()
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
-            ViewBag.Categories = _repo.GetResourceCategories();
+            ViewBag.Categories = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_repo.GetResourceCategories(), "CategoryId", "CategoryName");
             return View();
         }
 
@@ -56,7 +61,7 @@ namespace DIEMS.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.Categories = _repo.GetResourceCategories();
+            ViewBag.Categories = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_repo.GetResourceCategories(), "CategoryId", "CategoryName");
             return View(r);
         }
 
@@ -80,6 +85,17 @@ namespace DIEMS.Controllers
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
             dist.DistributedBy = HttpContext.Session.GetInt32("UserId") ?? 1;
+
+            // Clear validation for fields not present in the form or populated later
+            ModelState.Remove("DistId");
+            ModelState.Remove("DistributedBy");
+            ModelState.Remove("DistributedAt");
+            ModelState.Remove("Status");
+            ModelState.Remove("ResourceName");
+            ModelState.Remove("CategoryName");
+            ModelState.Remove("ShelterName");
+            ModelState.Remove("DisasterName");
+            ModelState.Remove("DistributedByName");
 
             if (ModelState.IsValid)
             {

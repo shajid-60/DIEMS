@@ -105,6 +105,32 @@ input, select, textarea {
   color: var(--text-primary);
 }
 
+.form-input, .form-select, .form-textarea {
+  padding: 10px 12px;
+  font-size: 14px;
+  background: var(--bg-card-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  width: 100%;
+  color: var(--text-primary);
+  transition: all var(--t-fast);
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-glow);
+  background: var(--bg-elevated);
+}
+
+.form-input:hover, .form-select:hover, .form-textarea:hover {
+  border-color: var(--border-mid);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
 /* ── Scrollbar ────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg-dark); }

@@ -34,6 +34,40 @@ namespace DIEMS.Data
             return list;
         }
 
+        public List<Disaster> GetFilteredDisasters(string status, string sort)
+        {
+            var list = new List<Disaster>();
+            
+            using (var conn = _db.GetConnection())
+            using (var cmd = new OracleCommand("GET_FILTERED_DISASTERS", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                var pCursor = new OracleParameter("v_cursor", OracleDbType.RefCursor);
+                pCursor.Direction = ParameterDirection.ReturnValue;
+                cmd.Parameters.Add(pCursor);
+
+                var pStatus = new OracleParameter("p_status", OracleDbType.Varchar2);
+                pStatus.Value = string.IsNullOrEmpty(status) ? "ALL" : status;
+                cmd.Parameters.Add(pStatus);
+
+                var pSort = new OracleParameter("p_sort", OracleDbType.Varchar2);
+                pSort.Value = string.IsNullOrEmpty(sort) ? "LATEST" : sort;
+                cmd.Parameters.Add(pSort);
+                
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var dt = new DataTable();
+                    dt.Load(reader);
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        list.Add(MapDisaster(row));
+                    }
+                }
+            }
+            return list;
+        }
+
         public List<Disaster> GetActiveDisasters()
         {
             var list = new List<Disaster>();

@@ -13,7 +13,23 @@
 <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 24px;">
     <!-- Incident Reports List -->
     <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
-        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 18px;">Citizen Reports</h3>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:18px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin:0;">Citizen Reports</h3>
+            <!-- PL/SQL Filter Form -->
+            <form method="get" asp-action="Index" style="display:flex; gap:12px;">
+                <select name="status" class="form-select" style="min-width:130px; font-size:12px; padding:6px 10px;" onchange="this.form.submit()">
+                    <option value="ALL" selected="@(ViewBag.CurrentStatus == "ALL")">All Statuses</option>
+                    <option value="Pending" selected="@(ViewBag.CurrentStatus == "Pending")">Pending</option>
+                    <option value="In Progress" selected="@(ViewBag.CurrentStatus == "In Progress")">In Progress</option>
+                    <option value="Resolved" selected="@(ViewBag.CurrentStatus == "Resolved")">Resolved</option>
+                    <option value="Discarded" selected="@(ViewBag.CurrentStatus == "Discarded")">Discarded</option>
+                </select>
+                <select name="sort" class="form-select" style="min-width:130px; font-size:12px; padding:6px 10px;" onchange="this.form.submit()">
+                    <option value="LATEST" selected="@(ViewBag.CurrentSort == "LATEST")">Latest First</option>
+                    <option value="OLDEST" selected="@(ViewBag.CurrentSort == "OLDEST")">Oldest First</option>
+                </select>
+            </form>
+        </div>
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>

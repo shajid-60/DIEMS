@@ -48,7 +48,20 @@
 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
     <!-- Resources List -->
     <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
-        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 18px;">Inventory Status</h3>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:18px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin:0;">Inventory Status</h3>
+            <!-- PL/SQL Filter Form -->
+            <form method="get" asp-action="Index" style="display:flex; gap:12px;">
+                <select name="category" asp-items="@ViewBag.Categories" class="form-select" style="min-width:130px; font-size:12px; padding:6px 10px;" onchange="this.form.submit()">
+                    <option value="ALL" selected="@(ViewBag.CurrentCategory == "ALL")">All Categories</option>
+                </select>
+                <select name="sort" class="form-select" style="min-width:130px; font-size:12px; padding:6px 10px;" onchange="this.form.submit()">
+                    <option value="LATEST" selected="@(ViewBag.CurrentSort == "LATEST")">Recently Updated</option>
+                    <option value="EXPIRY" selected="@(ViewBag.CurrentSort == "EXPIRY")">Closest Expiry</option>
+                    <option value="STOCK" selected="@(ViewBag.CurrentSort == "STOCK")">Highest Stock</option>
+                </select>
+            </form>
+        </div>
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>

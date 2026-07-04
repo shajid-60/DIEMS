@@ -17,15 +17,38 @@ namespace DIEMS.Data
 
         public List<IncidentReport> GetAllReports()
         {
+            return GetFilteredReports("ALL", "LATEST");
+        }
+
+        public List<IncidentReport> GetFilteredReports(string status, string sort)
+        {
             var list = new List<IncidentReport>();
+            string actualStatus = string.IsNullOrEmpty(status) ? "ALL" : status;
             string sql = @"
                 SELECT r.*, d.DISASTER_NAME, u.FULL_NAME AS ASSIGNED_TO_NAME
                 FROM INCIDENT_REPORTS r
                 LEFT JOIN DISASTERS d ON r.DISASTER_ID = d.DISASTER_ID
                 LEFT JOIN USERS u ON r.ASSIGNED_TO = u.USER_ID
-                ORDER BY r.CREATED_AT DESC";
+            ";
+            
+            if (actualStatus != "ALL") {
+                sql += " WHERE r.STATUS = :p_status";
+            }
 
-            var dt = _db.ExecuteQuery(sql);
+            if (sort == "SEVERITY") {
+                sql += " ORDER BY CASE r.SEVERITY WHEN 'Critical' THEN 1 WHEN 'High' THEN 2 WHEN 'Medium' THEN 3 ELSE 4 END, r.CREATED_AT DESC";
+            } else if (sort == "OLDEST") {
+                sql += " ORDER BY r.CREATED_AT ASC";
+            } else {
+                sql += " ORDER BY r.CREATED_AT DESC";
+            }
+
+            var parameters = new List<OracleParameter>();
+            if (actualStatus != "ALL") {
+                parameters.Add(new OracleParameter("p_status", actualStatus));
+            }
+
+            var dt = _db.ExecuteQuery(sql, parameters.ToArray());
             foreach (DataRow row in dt.Rows)
             {
                 list.Add(MapIncidentReport(row));

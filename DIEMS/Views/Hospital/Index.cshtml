@@ -16,7 +16,16 @@
 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
     <!-- Hospital Directory -->
     <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px;">
-        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 18px;">Emergency Healthcare Centers</h3>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:18px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin:0;">Emergency Healthcare Centers</h3>
+            <form method="get" asp-action="Index" style="display:flex; gap:12px;">
+                <select name="sort" class="form-select" style="min-width:130px; font-size:12px; padding:6px 10px;" onchange="this.form.submit()">
+                    <option value="NAME" selected="@(ViewBag.CurrentSort == "NAME")">Sort by Name</option>
+                    <option value="BEDS" selected="@(ViewBag.CurrentSort == "BEDS")">Available Beds (Desc)</option>
+                    <option value="ICU" selected="@(ViewBag.CurrentSort == "ICU")">Available ICU (Desc)</option>
+                </select>
+            </form>
+        </div>
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>

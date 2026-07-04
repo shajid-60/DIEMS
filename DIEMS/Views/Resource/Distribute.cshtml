@@ -24,12 +24,12 @@
 
         <div class="form-group" style="margin-bottom:16px;">
             <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Dispatch Quantity (@resource.Unit)</label>
-            <input type="number" name="Quantity" required style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;" min="1" max="@resource.AvailableQuantity" value="10" />
+            <input type="number" name="Quantity" required class="form-input" min="1" max="@resource.AvailableQuantity" value="10" />
         </div>
 
         <div class="form-group" style="margin-bottom:16px;">
             <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Destination Shelter (Optional)</label>
-            <select name="ShelterId" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+            <select name="ShelterId" class="form-select">
                 <option value="">-- Field Operation (No specific shelter) --</option>
                 @foreach (var s in (List<DIEMS.Models.Shelter>)ViewBag.Shelters)
                 {
@@ -40,7 +40,7 @@
 
         <div class="form-group" style="margin-bottom:16px;">
             <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Linked Emergency Disaster</label>
-            <select name="DisasterId" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+            <select name="DisasterId" class="form-select">
                 <option value="">-- General Relief Operation --</option>
                 @foreach (var d in (List<DIEMS.Models.Disaster>)ViewBag.Disasters)
                 {
@@ -51,7 +51,7 @@
 
         <div class="form-group" style="margin-bottom:16px;">
             <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Delivery Priority</label>
-            <select name="Priority" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white;">
+            <select name="Priority" class="form-select">
                 <option value="Normal">Normal</option>
                 <option value="Low">Low</option>
                 <option value="High">High</option>
@@ -61,7 +61,7 @@
 
         <div class="form-group" style="margin-bottom:20px;">
             <label style="font-size:12px; font-weight:600; color:var(--text-highlight); display:block; margin-bottom:6px;">Dispatch Dispatch Notes</label>
-            <textarea name="Notes" style="padding:10px; font-size:14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:6px; width:100%; color:white; height:80px; resize:vertical;" placeholder="e.g. Sent via NGO rescue truck, ETA 2 hours..."></textarea>
+            <textarea name="Notes" class="form-textarea" placeholder="e.g. Sent via NGO rescue truck, ETA 2 hours..."></textarea>
         </div>
 
         <button type="submit" class="btn btn-primary" style="padding:10px 24px; font-size:14px; background:var(--status-green); border-color:var(--status-green);">Dispatch Relief Pack</button>

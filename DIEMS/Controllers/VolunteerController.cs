@@ -23,10 +23,12 @@ namespace DIEMS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string status, string sort)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
-            var list = _repo.GetAllVolunteers();
+            var list = _repo.GetFilteredVolunteers(status, sort);
+            ViewBag.CurrentStatus = status ?? "ALL";
+            ViewBag.CurrentSort = sort ?? "LATEST";
             return View(list);
         }
 
@@ -41,6 +43,23 @@ namespace DIEMS.Controllers
             ViewBag.Disasters = _disasterRepo.GetAllDisasters();
             
             return View(v);
+        }
+
+        [HttpPost]
+        public IActionResult Create(Volunteer v)
+        {
+            if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            
+            ModelState.Remove("VolunteerId");
+            ModelState.Remove("CreatedAt");
+            ModelState.Remove("Username");
+            ModelState.Remove("Email");
+            
+            if (ModelState.IsValid)
+            {
+                _repo.InsertVolunteer(v);
+            }
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

@@ -25,10 +25,12 @@ namespace DIEMS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string status, string sort)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
-            var list = _repo.GetAllVictims();
+            var list = _repo.GetFilteredVictims(status, sort);
+            ViewBag.CurrentStatus = status ?? "ALL";
+            ViewBag.CurrentSort = sort ?? "LATEST";
             return View(list);
         }
 
@@ -57,6 +59,16 @@ namespace DIEMS.Controllers
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
             v.RegisteredBy = HttpContext.Session.GetInt32("UserId");
+
+            // Clear ignored fields
+            ModelState.Remove("VictimId");
+            ModelState.Remove("RegisteredBy");
+            ModelState.Remove("RegisteredAt");
+            ModelState.Remove("UpdatedAt");
+            ModelState.Remove("DisasterName");
+            ModelState.Remove("ShelterName");
+            ModelState.Remove("RegisteredByName");
+            ModelState.Remove("Status"); // Handled by DB default
 
             if (ModelState.IsValid)
             {
@@ -92,6 +104,14 @@ namespace DIEMS.Controllers
         public IActionResult Edit(Victim v)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            
+            ModelState.Remove("RegisteredBy");
+            ModelState.Remove("RegisteredAt");
+            ModelState.Remove("UpdatedAt");
+            ModelState.Remove("DisasterName");
+            ModelState.Remove("ShelterName");
+            ModelState.Remove("RegisteredByName");
+            
             if (ModelState.IsValid)
             {
                 _repo.UpdateVictim(v);
@@ -107,6 +127,9 @@ namespace DIEMS.Controllers
         public IActionResult AddFamilyMember(FamilyMember member)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            
+            ModelState.Remove("FmId");
+            
             if (ModelState.IsValid)
             {
                 _repo.InsertFamilyMember(member);

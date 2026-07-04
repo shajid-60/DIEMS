@@ -15,10 +15,19 @@ namespace DIEMS.Data
             _db = db;
         }
 
-        public List<Hospital> GetAllHospitals()
+        public List<Hospital> GetAllHospitals(string sort = "NAME")
         {
             var list = new List<Hospital>();
-            string sql = "SELECT * FROM HOSPITALS WHERE IS_ACTIVE = 1 ORDER BY HOSPITAL_NAME";
+            string sql = "SELECT * FROM HOSPITALS WHERE IS_ACTIVE = 1 ";
+            
+            if (sort == "BEDS") {
+                sql += "ORDER BY AVAILABLE_BEDS DESC";
+            } else if (sort == "ICU") {
+                sql += "ORDER BY ICU_AVAILABLE DESC";
+            } else {
+                sql += "ORDER BY HOSPITAL_NAME";
+            }
+
             var dt = _db.ExecuteQuery(sql);
             foreach (DataRow row in dt.Rows)
             {
@@ -108,9 +117,9 @@ namespace DIEMS.Data
                 SELECT d.*, h.HOSPITAL_NAME, dis.DISASTER_NAME
                 FROM DOCTORS d
                 JOIN HOSPITALS h ON d.HOSPITAL_ID = h.HOSPITAL_ID
-                LEFT JOIN DISASTERS dis ON d.CURRENT_DISASTER_ID = dis.DISASTER_ID
+                LEFT JOIN DISASTERS dis ON d.ASSIGNED_DISASTER_ID = dis.DISASTER_ID
                 WHERE d.HOSPITAL_ID = :id
-                ORDER BY d.DOCTOR_NAME";
+                ORDER BY d.FULL_NAME";
 
             var dt = _db.ExecuteQuery(sql, new OracleParameter("id", hospitalId));
             foreach (DataRow row in dt.Rows)

@@ -17,19 +17,39 @@ namespace DIEMS.Data
 
         public List<Victim> GetAllVictims()
         {
-            var list = new List<Victim>();
-            string sql = @"
-                SELECT v.*, d.DISASTER_NAME, s.SHELTER_NAME, u.FULL_NAME AS REGISTERED_BY_NAME
-                FROM VICTIMS v
-                JOIN DISASTERS d ON v.DISASTER_ID = d.DISASTER_ID
-                LEFT JOIN SHELTERS s ON v.SHELTER_ID = s.SHELTER_ID
-                LEFT JOIN USERS u ON v.REGISTERED_BY = u.USER_ID
-                ORDER BY v.REGISTERED_AT DESC";
+            return GetFilteredVictims("ALL", "LATEST");
+        }
 
-            var dt = _db.ExecuteQuery(sql);
-            foreach (DataRow row in dt.Rows)
+        public List<Victim> GetFilteredVictims(string status, string sort)
+        {
+            var list = new List<Victim>();
+            
+            using (var conn = _db.GetConnection())
+            using (var cmd = new OracleCommand("GET_FILTERED_VICTIMS", conn))
             {
-                list.Add(MapVictim(row));
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                var pCursor = new OracleParameter("v_cursor", OracleDbType.RefCursor);
+                pCursor.Direction = System.Data.ParameterDirection.ReturnValue;
+                cmd.Parameters.Add(pCursor);
+
+                var pStatus = new OracleParameter("p_status", OracleDbType.Varchar2);
+                pStatus.Value = string.IsNullOrEmpty(status) ? "ALL" : status;
+                cmd.Parameters.Add(pStatus);
+
+                var pSort = new OracleParameter("p_sort", OracleDbType.Varchar2);
+                pSort.Value = string.IsNullOrEmpty(sort) ? "LATEST" : sort;
+                cmd.Parameters.Add(pSort);
+                
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var dt = new System.Data.DataTable();
+                    dt.Load(reader);
+                    foreach (System.Data.DataRow row in dt.Rows)
+                    {
+                        list.Add(MapVictim(row));
+                    }
+                }
             }
             return list;
         }

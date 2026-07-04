@@ -21,10 +21,14 @@ namespace DIEMS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string status, string sort)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
-            var list = _repo.GetAllDisasters();
+            
+            ViewBag.CurrentStatus = status ?? "ALL";
+            ViewBag.CurrentSort = sort ?? "LATEST";
+
+            var list = _repo.GetFilteredDisasters(status, sort);
             return View(list);
         }
 
@@ -57,6 +61,16 @@ namespace DIEMS.Controllers
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
             d.ReportedBy = HttpContext.Session.GetInt32("UserId");
             
+            ModelState.Remove("DisasterId");
+            ModelState.Remove("CreatedAt");
+            ModelState.Remove("UpdatedAt");
+            ModelState.Remove("TypeName");
+            ModelState.Remove("TypeIcon");
+            ModelState.Remove("TypeColor");
+            ModelState.Remove("SeverityName");
+            ModelState.Remove("SeverityColor");
+            ModelState.Remove("ReporterName");
+
             if (ModelState.IsValid)
             {
                 _repo.InsertDisaster(d);
@@ -84,6 +98,16 @@ namespace DIEMS.Controllers
         public IActionResult Edit(Disaster d)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            
+            ModelState.Remove("CreatedAt");
+            ModelState.Remove("UpdatedAt");
+            ModelState.Remove("TypeName");
+            ModelState.Remove("TypeIcon");
+            ModelState.Remove("TypeColor");
+            ModelState.Remove("SeverityName");
+            ModelState.Remove("SeverityColor");
+            ModelState.Remove("ReporterName");
+
             if (ModelState.IsValid)
             {
                 _repo.UpdateDisaster(d);
@@ -99,6 +123,11 @@ namespace DIEMS.Controllers
         public IActionResult AddAffectedArea(AffectedArea area)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            
+            ModelState.Remove("AreaId");
+            ModelState.Remove("CreatedAt");
+            ModelState.Remove("DisasterName");
+
             if (ModelState.IsValid)
             {
                 _repo.InsertAffectedArea(area);

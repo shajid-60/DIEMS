@@ -23,12 +23,32 @@ namespace DIEMS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string status, string sort)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
-            var list = _repo.GetAllReports();
+            var list = _repo.GetFilteredReports(status, sort);
+            ViewBag.CurrentStatus = status ?? "ALL";
+            ViewBag.CurrentSort = sort ?? "LATEST";
             ViewBag.AuditLogs = _repo.GetAuditLogs(); // Access audit trail
             return View(list);
+        }
+
+        [HttpPost]
+        public IActionResult Submit(IncidentReport r)
+        {
+            if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            
+            ModelState.Remove("ReportId");
+            ModelState.Remove("ReportedAt");
+            ModelState.Remove("DisasterName");
+            ModelState.Remove("AssignedToName");
+            
+            if (ModelState.IsValid)
+            {
+                _repo.InsertReport(r);
+                return RedirectToAction("Index");
+            }
+            return View("Create", r);
         }
 
         [HttpGet]

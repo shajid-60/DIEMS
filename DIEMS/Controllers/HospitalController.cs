@@ -23,10 +23,13 @@ namespace DIEMS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string sort)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
-            var list = _repo.GetAllHospitals();
+            
+            ViewBag.CurrentSort = sort ?? "NAME";
+            
+            var list = _repo.GetAllHospitals(sort);
             ViewBag.Requests = _repo.GetMedicalRequests();
             return View(list);
         }
@@ -56,6 +59,11 @@ namespace DIEMS.Controllers
         public IActionResult Create(Hospital h)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            
+            ModelState.Remove("HospitalId");
+            ModelState.Remove("CreatedAt");
+            ModelState.Remove("UpdatedAt");
+
             if (ModelState.IsValid)
             {
                 _repo.InsertHospital(h);
