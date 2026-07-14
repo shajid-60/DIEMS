@@ -20,6 +20,11 @@ namespace DIEMS.Controllers
             return HttpContext.Session.GetInt32("UserId") != null;
         }
 
+        private string GetRole()
+        {
+            return HttpContext.Session.GetString("Role") ?? "";
+        }
+
         [HttpGet]
         public IActionResult Index(string status, string sort)
         {
@@ -50,6 +55,8 @@ namespace DIEMS.Controllers
         public IActionResult Create()
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
+
             ViewBag.Types = _repo.GetDisasterTypes();
             ViewBag.SeverityLevels = _repo.GetSeverityLevels();
             return View();
@@ -59,6 +66,8 @@ namespace DIEMS.Controllers
         public IActionResult Create(Disaster d)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
+
             d.ReportedBy = HttpContext.Session.GetInt32("UserId");
             
             ModelState.Remove("DisasterId");
@@ -86,6 +95,8 @@ namespace DIEMS.Controllers
         public IActionResult Edit(int id)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
+
             var d = _repo.GetDisasterById(id);
             if (d == null) return NotFound();
 
@@ -98,6 +109,7 @@ namespace DIEMS.Controllers
         public IActionResult Edit(Disaster d)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
             
             ModelState.Remove("CreatedAt");
             ModelState.Remove("UpdatedAt");
@@ -123,6 +135,7 @@ namespace DIEMS.Controllers
         public IActionResult AddAffectedArea(AffectedArea area)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
             
             ModelState.Remove("AreaId");
             ModelState.Remove("CreatedAt");

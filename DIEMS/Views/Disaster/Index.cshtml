@@ -1,6 +1,8 @@
 @model List<DIEMS.Models.Disaster>
 @{
     ViewData["Title"] = "Disaster Database";
+    var role = Context.Session.GetString("Role") ?? "";
+    var isAdmin = role == "Admin";
 }
 
 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; flex-wrap: wrap; gap: 16px;">
@@ -28,7 +30,10 @@
         </form>
 
         <input type="text" id="disasterSearch" class="form-input" style="padding: 8px 14px; font-size: 13px; width: 200px;" placeholder="JS quick search..." onkeyup="filterDisasterTable()" />
-        <a asp-controller="Disaster" asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New</a>
+        @if (isAdmin)
+        {
+            <a asp-controller="Disaster" asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New</a>
+        }
     </div>
 </div>
 
@@ -72,7 +77,10 @@
                         <td style="padding:14px 8px;">৳ @d.EstimatedDamage.ToString("N0")</td>
                         <td style="padding:14px 8px; text-align:right;">
                             <a asp-action="Details" asp-route-id="@d.DisasterId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px; margin-right:5px;">Track</a>
-                            <a asp-action="Edit" asp-route-id="@d.DisasterId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px; color:var(--status-orange); border-color:var(--status-orange)33;">Edit</a>
+                            @if (isAdmin)
+                            {
+                                <a asp-action="Edit" asp-route-id="@d.DisasterId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px; color:var(--status-orange); border-color:var(--status-orange)33;">Edit</a>
+                            }
                         </td>
                     </tr>
                 }

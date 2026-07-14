@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Hospitals & Medical";
     var requests = (List<DIEMS.Models.MedicalRequest>)ViewBag.Requests;
+    var role = Context.Session.GetString("Role") ?? "";
+    var isAdmin = role == "Admin";
 }
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
@@ -9,7 +11,10 @@
         <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Hospitals & Medical Support</h1>
         <p style="font-size:13px; color:var(--text-muted);">Emergency bed availability, ICU coordinates, blood stocks, and inter-hospital requests</p>
     </div>
-    <a asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register Hospital</a>
+    @if (isAdmin)
+    {
+        <a asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register Hospital</a>
+    }
 </div>
 
 <!-- Double Column Section -->

@@ -3,6 +3,8 @@
     ViewData["Title"] = Model.ShelterName;
     var residents = (List<DIEMS.Models.ShelterResident>)ViewBag.Residents;
     var allVictims = (List<DIEMS.Models.Victim>)ViewBag.AllVictims;
+    var role = Context.Session.GetString("Role") ?? "";
+    var isAdminOrResponder = role == "Admin" || role == "Responder";
 }
 
 <div style="margin-bottom: 24px;">
@@ -65,41 +67,44 @@
     </div>
 
     <!-- Check-in Resident Panel -->
-    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
-        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:14px;">Resident Check-in</h3>
-        
-        <form method="post" asp-action="CheckIn">
-            <input type="hidden" name="ShelterId" value="@Model.ShelterId" />
+    @if (isAdminOrResponder)
+    {
+        <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Check In Resident</h3>
+            
+            <form method="post" asp-action="CheckIn">
+                <input type="hidden" name="ShelterId" value="@Model.ShelterId" />
 
-            <div class="form-group" style="margin-bottom:12px;">
-                <label style="font-size:11px; color:var(--text-muted);">Displaced Victim</label>
-                <select name="VictimId" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
-                    <option value="">-- Select Displaced Victim --</option>
-                    @foreach (var v in allVictims)
-                    {
-                        @if (v.ShelterId == null && v.Status != "Deceased")
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Displaced Victim</label>
+                    <select name="VictimId" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                        <option value="">-- Select Displaced Victim --</option>
+                        @foreach (var v in allVictims)
                         {
-                            <option value="@v.VictimId">@v.FullName (NID: @(v.Nid ?? "N/A"))</option>
+                            @if (v.ShelterId == null && v.Status != "Deceased")
+                            {
+                                <option value="@v.VictimId">@v.FullName (NID: @(v.Nid ?? "N/A"))</option>
+                            }
                         }
-                    }
-                </select>
-            </div>
+                    </select>
+                </div>
 
-            <div class="form-group" style="margin-bottom:12px;">
-                <label style="font-size:11px; color:var(--text-muted);">Assigned Bed / Space Code</label>
-                <input type="text" name="BedNumber" placeholder="e.g. Bed A-12" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
-            </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Assigned Bed / Space Code</label>
+                    <input type="text" name="BedNumber" placeholder="e.g. Bed A-12" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+                </div>
 
-            <div class="form-group" style="margin-bottom:16px;">
-                <label style="font-size:11px; color:var(--text-muted);">Check-in Notes</label>
-                <textarea name="Notes" placeholder="Remarks..." style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white; height:60px;"></textarea>
-            </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Check-in Notes</label>
+                    <textarea name="Notes" placeholder="Remarks..." style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white; height:60px;"></textarea>
+                </div>
 
-            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
-                Check In Resident
-            </button>
-        </form>
-    </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
+                    Check In Resident
+                </button>
+            </form>
+        </div>
+    }
 </div>
 
 <!-- Active Residents Table -->
@@ -131,19 +136,26 @@
                         </td>
                         <td style="padding:12px 8px; font-size:12px; color:var(--text-muted);">@res.Notes</td>
                         <td style="padding:12px 8px; text-align:right;">
-                            @if (res.Status == "Active")
+                            @if (isAdminOrResponder)
                             {
-                                <form method="post" asp-action="CheckOut" style="display:inline;">
-                                    <input type="hidden" name="srId" value="@res.SrId" />
-                                    <input type="hidden" name="shelterId" value="@Model.ShelterId" />
-                                    <button type="submit" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px; color:var(--status-red); border-color:var(--status-red)33;">
-                                        Check Out
-                                    </button>
-                                </form>
+                                @if (res.Status == "Active")
+                                {
+                                    <form method="post" asp-action="CheckOut" style="display:inline;">
+                                        <input type="hidden" name="srId" value="@res.SrId" />
+                                        <input type="hidden" name="shelterId" value="@Model.ShelterId" />
+                                        <button type="submit" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px; color:var(--status-red); border-color:var(--status-red)33;">
+                                            Check Out
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span style="font-size:11px; color:var(--text-muted);">Discharged</span>
+                                }
                             }
                             else
                             {
-                                <span style="font-size:11px; color:var(--text-muted);">Discharged</span>
+                                <span style="font-size:11px; color:var(--text-muted);">@res.Status</span>
                             }
                         </td>
                     </tr>

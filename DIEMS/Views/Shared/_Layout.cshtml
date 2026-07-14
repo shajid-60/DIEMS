@@ -20,6 +20,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
+    @{
+        var userRole = Context.Session.GetString("Role") ?? "";
+        var isAdmin = userRole == "Admin";
+        var isOfficial = userRole == "Official";
+        var isResponder = userRole == "Responder";
+    }
+
     <!-- Alert Ticker -->
     <div class="alert-ticker">
         <div class="ticker-label"><span class="pulse-dot"></span> LIVE ALERTS</div>
@@ -27,7 +34,7 @@
             <span>🌊 Cyclone REMAL — Category 4 — Coastal evacuation in progress &nbsp;|&nbsp;
                   🔥 Wildfire — Sylhet Division — 3 fire brigades deployed &nbsp;|&nbsp;
                   🏥 Medical emergency — Dhaka General Hospital — Blood O+ critical &nbsp;|&nbsp;
-                  🌍 Aftershock M4.2 — Chittagong — Search & rescue ongoing &nbsp;|&nbsp;
+                  🌍 Aftershock M4.2 — Chittagong — Search &amp; rescue ongoing &nbsp;|&nbsp;
                   💧 Flash Flood — Sunamganj District — 12,000 displaced</span>
         </div>
     </div>
@@ -50,12 +57,27 @@
                 </svg>
                 <div class="sidebar-brand-text">
                     <span class="sidebar-acronym">DIEMS</span>
-                    <span class="sidebar-tagline">Disaster Intelligence &<br/>Emergency Management</span>
+                    <span class="sidebar-tagline">Disaster Intelligence &amp;<br/>Emergency Management</span>
                 </div>
             </div>
 
             <nav class="sidebar-nav">
-                <span class="nav-section-title">Command Center</span>
+                @if (isAdmin)
+                {
+                    <span class="nav-section-title">Command Center</span>
+                }
+                else if (isOfficial)
+                {
+                    <span class="nav-section-title">Oversight Console</span>
+                }
+                else if (isResponder)
+                {
+                    <span class="nav-section-title">Field Operations</span>
+                }
+                else
+                {
+                    <span class="nav-section-title">Command Center</span>
+                }
 
                 <a asp-controller="Home" asp-action="Dashboard" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "active" : "")">
                     <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
@@ -86,27 +108,35 @@
 
                 <a asp-controller="Hospital" asp-action="Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Hospital" ? "active" : "")">
                     <svg viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Hospitals & Medical
+                    Hospitals &amp; Medical
                 </a>
 
-                <span class="nav-section-title">Field Operations</span>
+                @if (isAdmin || isOfficial)
+                {
+                    <span class="nav-section-title">@(isAdmin ? "Field Operations" : "Personnel")</span>
 
-                <a asp-controller="Volunteer" asp-action="Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Volunteer" ? "active" : "")">
-                    <svg viewBox="0 0 24 24" fill="none"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" stroke-width="2"/></svg>
-                    Volunteers
-                </a>
+                    <a asp-controller="Volunteer" asp-action="Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Volunteer" ? "active" : "")">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" stroke-width="2"/></svg>
+                        Volunteers@(isOfficial ? " (View Only)" : "")
+                    </a>
+                }
+
+                <span class="nav-section-title">@(isResponder ? "Reporting" : "Field Operations")</span>
 
                 <a asp-controller="Report" asp-action="Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Report" ? "active" : "")">
                     <svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2"/><polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/><line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2"/><line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2"/><line x1="10" y1="9" x2="8" y2="9" stroke="currentColor" stroke-width="2"/></svg>
                     Incident Reports
                 </a>
 
-                <span class="nav-section-title">Intelligence</span>
+                @if (isAdmin || isOfficial)
+                {
+                    <span class="nav-section-title">Intelligence</span>
 
-                <a asp-controller="Analytics" asp-action="Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Analytics" ? "active" : "")">
-                    <svg viewBox="0 0 24 24" fill="none"><line x1="18" y1="20" x2="18" y2="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="20" x2="12" y2="4"  stroke="currentColor" stroke-width="2"/><line x1="6"  y1="20" x2="6"  y2="14" stroke="currentColor" stroke-width="2"/></svg>
-                    Risk Analytics
-                </a>
+                    <a asp-controller="Analytics" asp-action="Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Analytics" ? "active" : "")">
+                        <svg viewBox="0 0 24 24" fill="none"><line x1="18" y1="20" x2="18" y2="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="20" x2="12" y2="4"  stroke="currentColor" stroke-width="2"/><line x1="6"  y1="20" x2="6"  y2="14" stroke="currentColor" stroke-width="2"/></svg>
+                        Risk Analytics
+                    </a>
+                }
             </nav>
 
             <!-- Sidebar User Profile Footer -->
@@ -117,7 +147,24 @@
                     </div>
                     <div class="user-info-mini">
                         <div class="user-name-mini" style="font-weight: 700;">@Context.Session.GetString("FullName")</div>
-                        <div class="user-role-mini" style="font-size: 11px; color: var(--text-muted);">@Context.Session.GetString("Role")</div>
+                        <div class="user-role-mini" style="font-size: 11px; display: flex; align-items: center; gap: 6px;">
+                            @if (isAdmin)
+                            {
+                                <span style="background:rgba(255,59,59,0.2);color:#FF6B6B;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:700;border:1px solid rgba(255,59,59,0.3);">ADMIN</span>
+                            }
+                            else if (isOfficial)
+                            {
+                                <span style="background:rgba(59,130,246,0.2);color:#60A5FA;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:700;border:1px solid rgba(59,130,246,0.3);">OFFICIAL</span>
+                            }
+                            else if (isResponder)
+                            {
+                                <span style="background:rgba(0,255,136,0.15);color:#00FF88;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:700;border:1px solid rgba(0,255,136,0.3);">RESPONDER</span>
+                            }
+                            else
+                            {
+                                <span style="color: var(--text-muted);">@Context.Session.GetString("Role")</span>
+                            }
+                        </div>
                     </div>
                     <a asp-controller="Home" asp-action="Logout" title="Logout" style="margin-left: auto; color: var(--status-red); display: flex; align-items: center;">
                         <svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 01-2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -132,8 +179,26 @@
             <header class="topbar">
                 <div style="display:flex;align-items:center;gap:16px;">
                     <div>
-                        <h2 style="font-size:17px;font-weight:700; color: var(--text-highlight);">DIEMS National Command Center</h2>
-                        <p style="font-size:12px;color:var(--text-muted);">Connected to Oracle Database 24.3.1</p>
+                        @if (isAdmin)
+                        {
+                            <h2 style="font-size:17px;font-weight:700; color: var(--text-highlight);">DIEMS National Command Center</h2>
+                            <p style="font-size:12px;color:var(--text-muted);">Full System Access · Connected to Oracle Database</p>
+                        }
+                        else if (isOfficial)
+                        {
+                            <h2 style="font-size:17px;font-weight:700; color: var(--text-highlight);">DIEMS Official Oversight Console</h2>
+                            <p style="font-size:12px;color:var(--text-muted);">Read-Only Oversight · @Context.Session.GetString("District") District</p>
+                        }
+                        else if (isResponder)
+                        {
+                            <h2 style="font-size:17px;font-weight:700; color: var(--text-highlight);">DIEMS Field Operations Terminal</h2>
+                            <p style="font-size:12px;color:var(--text-muted);">Emergency Response Mode · @Context.Session.GetString("District") District</p>
+                        }
+                        else
+                        {
+                            <h2 style="font-size:17px;font-weight:700; color: var(--text-highlight);">DIEMS</h2>
+                            <p style="font-size:12px;color:var(--text-muted);">Connected to Oracle Database</p>
+                        }
                     </div>
                 </div>
 

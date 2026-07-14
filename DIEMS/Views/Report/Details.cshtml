@@ -1,6 +1,8 @@
 @model DIEMS.Models.IncidentReport
 @{
     ViewData["Title"] = "Report " + Model.ReportId;
+    var role = Context.Session.GetString("Role") ?? "";
+    var isAdminOrResponder = role == "Admin" || role == "Responder";
 }
 
 <div style="margin-bottom: 24px;">
@@ -60,26 +62,29 @@
             <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Assigned Responder: <strong>@Model.AssignedToName</strong></div>
         </div>
 
-        <form method="post" asp-action="UpdateStatus">
-            <input type="hidden" name="reportId" value="@Model.ReportId" />
+        @if (isAdminOrResponder)
+        {
+            <form method="post" asp-action="UpdateStatus">
+                <input type="hidden" name="reportId" value="@Model.ReportId" />
 
-            <div class="form-group" style="margin-bottom:12px;">
-                <label style="font-size:11px; color:var(--text-muted);">Set Status</label>
-                <select name="status" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
-                    <!option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Pending</!option>
-                    <!option value="Assigned" @(Model.Status == "Assigned" ? "selected" : "")>Assigned</!option>
-                    <!option value="Resolved" @(Model.Status == "Resolved" ? "selected" : "")>Resolved</!option>
-                </select>
-            </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Set Status</label>
+                    <select name="status" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                        <!option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Pending</!option>
+                        <!option value="Assigned" @(Model.Status == "Assigned" ? "selected" : "")>Assigned</!option>
+                        <!option value="Resolved" @(Model.Status == "Resolved" ? "selected" : "")>Resolved</!option>
+                    </select>
+                </div>
 
-            <div class="form-group" style="margin-bottom:16px;">
-                <label style="font-size:11px; color:var(--text-muted);">Action / Resolution Notes</label>
-                <textarea name="notes" placeholder="Enter resolution notes..." style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white; height:80px;">@Model.ResolutionNotes</textarea>
-            </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Action / Resolution Notes</label>
+                    <textarea name="notes" placeholder="Enter resolution notes..." style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white; height:80px;">@Model.ResolutionNotes</textarea>
+                </div>
 
-            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
-                Update Ticket Status
-            </button>
-        </form>
+                <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
+                    Update Ticket Status
+                </button>
+            </form>
+        }
     </div>
 </div>

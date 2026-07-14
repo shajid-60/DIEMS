@@ -1,6 +1,9 @@
 @model List<DIEMS.Models.Victim>
 @{
     ViewData["Title"] = "Victim Management";
+    var role = Context.Session.GetString("Role") ?? "";
+    var isAdmin = role == "Admin";
+    var isResponder = role == "Responder";
 }
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
@@ -8,7 +11,10 @@
         <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Victim Management Registry</h1>
         <p style="font-size:13px; color:var(--text-muted);">Displaced citizen tracking, shelter assignment, and medical coordination</p>
     </div>
-    <a asp-controller="Victim" asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New Victim</a>
+    @if (isAdmin || isResponder)
+    {
+        <a asp-controller="Victim" asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New Victim</a>
+    }
 </div>
 
 <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">

@@ -24,6 +24,11 @@ namespace DIEMS.Controllers
             return HttpContext.Session.GetInt32("UserId") != null;
         }
 
+        private string GetRole()
+        {
+            return HttpContext.Session.GetString("Role") ?? "";
+        }
+
         [HttpGet]
         public IActionResult Index(string category, string sort)
         {
@@ -45,6 +50,8 @@ namespace DIEMS.Controllers
         public IActionResult Create()
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
+
             ViewBag.Categories = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_repo.GetResourceCategories(), "CategoryId", "CategoryName");
             return View();
         }
@@ -53,6 +60,8 @@ namespace DIEMS.Controllers
         public IActionResult Create(Resource r)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
+
             r.UpdatedBy = HttpContext.Session.GetInt32("UserId");
 
             if (ModelState.IsValid)
@@ -69,6 +78,8 @@ namespace DIEMS.Controllers
         public IActionResult Distribute(int id)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
             
             var resource = _repo.GetAllResources().Find(x => x.ResourceId == id);
             if (resource == null) return NotFound();
@@ -84,6 +95,9 @@ namespace DIEMS.Controllers
         public IActionResult Distribute(ResourceDistribution dist)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
+
             dist.DistributedBy = HttpContext.Session.GetInt32("UserId") ?? 1;
 
             // Clear validation for fields not present in the form or populated later

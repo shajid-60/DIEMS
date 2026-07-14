@@ -22,6 +22,11 @@ namespace DIEMS.Controllers
             return HttpContext.Session.GetInt32("UserId") != null;
         }
 
+        private string GetRole()
+        {
+            return HttpContext.Session.GetString("Role") ?? "";
+        }
+
         [HttpGet]
         public IActionResult Index(string status, string sort)
         {
@@ -29,7 +34,18 @@ namespace DIEMS.Controllers
             var list = _repo.GetFilteredReports(status, sort);
             ViewBag.CurrentStatus = status ?? "ALL";
             ViewBag.CurrentSort = sort ?? "LATEST";
-            ViewBag.AuditLogs = _repo.GetAuditLogs(); // Access audit trail
+
+            // Audit logs only for Admin and Official
+            var role = GetRole();
+            if (role == "Admin" || role == "Official")
+            {
+                ViewBag.AuditLogs = _repo.GetAuditLogs();
+            }
+            else
+            {
+                ViewBag.AuditLogs = new System.Collections.Generic.List<DIEMS.Models.AuditLog>();
+            }
+            
             return View(list);
         }
 
@@ -90,6 +106,9 @@ namespace DIEMS.Controllers
         public IActionResult UpdateStatus(int reportId, string status, string notes)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Official") return RedirectToAction("AccessDenied", "Home");
+
             int userId = HttpContext.Session.GetInt32("UserId") ?? 1;
 
             var r = new IncidentReport

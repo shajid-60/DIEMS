@@ -2,6 +2,8 @@
     ViewData["Title"] = "Shelter Management";
     var shelters = (List<DIEMS.Models.Shelter>)ViewBag.Shelters;
     var available = (List<DIEMS.Models.Shelter>)ViewBag.Available;
+    var role = Context.Session.GetString("Role") ?? "";
+    var isAdmin = role == "Admin";
 }
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
@@ -9,7 +11,10 @@
         <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Emergency Shelter Management</h1>
         <p style="font-size:13px; color:var(--text-muted);">Real-time capacity tracking, victim registration, and overflow support</p>
     </div>
-    <a asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New Shelter</a>
+    @if (isAdmin)
+    {
+        <a asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Register New Shelter</a>
+    }
 </div>
 
 <!-- Active Available Shelters Panel (Views query) -->

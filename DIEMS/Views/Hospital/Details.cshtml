@@ -4,6 +4,8 @@
     var doctors = (List<DIEMS.Models.Doctor>)ViewBag.Doctors;
     var ambulances = (List<DIEMS.Models.Ambulance>)ViewBag.Ambulances;
     var disasters = (List<DIEMS.Models.Disaster>)ViewBag.Disasters;
+    var role = Context.Session.GetString("Role") ?? "";
+    var isAdminOrResponder = role == "Admin" || role == "Responder";
 }
 
 <div style="margin-bottom: 24px;">
@@ -49,53 +51,56 @@
     </div>
 
     <!-- Request Help Form -->
-    <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
-        <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:14px;">Raise Medical Request</h3>
-        
-        <form method="post" asp-action="RequestMedical">
-            <input type="hidden" name="HospitalId" value="@Model.HospitalId" />
+    @if (isAdminOrResponder)
+    {
+        <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px;">
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-highlight); margin-bottom:14px;">Raise Medical Request</h3>
+            
+            <form method="post" asp-action="RequestMedical">
+                <input type="hidden" name="HospitalId" value="@Model.HospitalId" />
 
-            <div class="form-group" style="margin-bottom:12px;">
-                <label style="font-size:11px; color:var(--text-muted);">Patient Name</label>
-                <input type="text" name="PatientName" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" placeholder="e.g. Robin Mia" />
-            </div>
-
-            <div class="form-group" style="margin-bottom:12px;">
-                <label style="font-size:11px; color:var(--text-muted);">Required Medical Specialty</label>
-                <input type="text" name="RequiredSpecialty" placeholder="e.g. General Surgery" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
-                <div class="form-group">
-                    <label style="font-size:11px; color:var(--text-muted);">Blood Group</label>
-                    <input type="text" name="BloodGroupNeeded" placeholder="e.g. O-" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Patient Name</label>
+                    <input type="text" name="PatientName" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" placeholder="e.g. Robin Mia" />
                 </div>
-                <div class="form-group">
-                    <label style="font-size:11px; color:var(--text-muted);">Urgency Level</label>
-                    <select name="UrgencyLevel" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
-                        <option value="Normal">Normal</option>
-                        <option value="High">High</option>
-                        <option value="Immediate">Immediate</option>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Required Medical Specialty</label>
+                    <input type="text" name="RequiredSpecialty" placeholder="e.g. General Surgery" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                    <div class="form-group">
+                        <label style="font-size:11px; color:var(--text-muted);">Blood Group</label>
+                        <input type="text" name="BloodGroupNeeded" placeholder="e.g. O-" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size:11px; color:var(--text-muted);">Urgency Level</label>
+                        <select name="UrgencyLevel" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                            <option value="Normal">Normal</option>
+                            <option value="High">High</option>
+                            <option value="Immediate">Immediate</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="font-size:11px; color:var(--text-muted);">Linked Disaster Event</label>
+                    <select name="DisasterId" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                        <option value="">-- General healthcare request --</option>
+                        @foreach (var d in disasters)
+                        {
+                            <option value="@d.DisasterId">@d.DisasterName</option>
+                        }
                     </select>
                 </div>
-            </div>
 
-            <div class="form-group" style="margin-bottom:16px;">
-                <label style="font-size:11px; color:var(--text-muted);">Linked Disaster Event</label>
-                <select name="DisasterId" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
-                    <option value="">-- General healthcare request --</option>
-                    @foreach (var d in disasters)
-                    {
-                        <option value="@d.DisasterId">@d.DisasterName</option>
-                    }
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
-                Submit Medical Request
-            </button>
-        </form>
-    </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
+                    Submit Medical Request
+                </button>
+            </form>
+        </div>
+    }
 </div>
 
 <!-- Doctors & Ambulances Lists -->

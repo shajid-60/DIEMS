@@ -19,10 +19,17 @@ namespace DIEMS.Controllers
             return HttpContext.Session.GetInt32("UserId") != null;
         }
 
+        private string GetRole()
+        {
+            return HttpContext.Session.GetString("Role") ?? "";
+        }
+
         [HttpGet]
         public IActionResult Index()
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Official") return RedirectToAction("AccessDenied", "Home");
             return View();
         }
 
@@ -30,6 +37,8 @@ namespace DIEMS.Controllers
         public IActionResult GetTrendData()
         {
             if (!CheckAuth()) return Challenge();
+            var role = GetRole();
+            if (role != "Admin" && role != "Official") return Forbid();
             var data = _repo.GetDisasterTrendData();
             return Json(data);
         }
@@ -38,6 +47,8 @@ namespace DIEMS.Controllers
         public IActionResult GetResourceLevels()
         {
             if (!CheckAuth()) return Challenge();
+            var role = GetRole();
+            if (role != "Admin" && role != "Official") return Forbid();
             var data = _repo.GetResourceCategoryLevels();
             return Json(data);
         }
@@ -46,6 +57,8 @@ namespace DIEMS.Controllers
         public IActionResult GetHospitalStats()
         {
             if (!CheckAuth()) return Challenge();
+            var role = GetRole();
+            if (role != "Admin" && role != "Official") return Forbid();
             var data = _repo.GetHospitalStatusData();
             return Json(data);
         }

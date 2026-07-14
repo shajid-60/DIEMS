@@ -24,6 +24,11 @@ namespace DIEMS.Controllers
             return HttpContext.Session.GetInt32("UserId") != null;
         }
 
+        private string GetRole()
+        {
+            return HttpContext.Session.GetString("Role") ?? "";
+        }
+
         [HttpGet]
         public IActionResult Index(string status, string sort)
         {
@@ -49,6 +54,9 @@ namespace DIEMS.Controllers
         public IActionResult Create()
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
+
             ViewBag.Disasters = _disasterRepo.GetAllDisasters();
             ViewBag.Shelters = _shelterRepo.GetAllShelters();
             return View();
@@ -58,6 +66,9 @@ namespace DIEMS.Controllers
         public IActionResult Create(Victim v, bool autoAllocate = true)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
+
             v.RegisteredBy = HttpContext.Session.GetInt32("UserId");
 
             // Clear ignored fields
@@ -92,6 +103,9 @@ namespace DIEMS.Controllers
         public IActionResult Edit(int id)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
+
             var v = _repo.GetVictimById(id);
             if (v == null) return NotFound();
 
@@ -104,6 +118,8 @@ namespace DIEMS.Controllers
         public IActionResult Edit(Victim v)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
             
             ModelState.Remove("RegisteredBy");
             ModelState.Remove("RegisteredAt");
@@ -127,6 +143,8 @@ namespace DIEMS.Controllers
         public IActionResult AddFamilyMember(FamilyMember member)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
             
             ModelState.Remove("FmId");
             

@@ -22,6 +22,11 @@ namespace DIEMS.Controllers
             return HttpContext.Session.GetInt32("UserId") != null;
         }
 
+        private string GetRole()
+        {
+            return HttpContext.Session.GetString("Role") ?? "";
+        }
+
         [HttpGet]
         public IActionResult Index(string sort)
         {
@@ -52,6 +57,7 @@ namespace DIEMS.Controllers
         public IActionResult Create()
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
             return View();
         }
 
@@ -59,6 +65,7 @@ namespace DIEMS.Controllers
         public IActionResult Create(Hospital h)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
             
             ModelState.Remove("HospitalId");
             ModelState.Remove("CreatedAt");
@@ -76,6 +83,9 @@ namespace DIEMS.Controllers
         public IActionResult RequestMedical(MedicalRequest req)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
+
             req.RequestedBy = HttpContext.Session.GetInt32("UserId") ?? 1;
 
             if (ModelState.IsValid)

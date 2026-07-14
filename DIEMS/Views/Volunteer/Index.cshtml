@@ -1,6 +1,8 @@
 @model List<DIEMS.Models.Volunteer>
 @{
     ViewData["Title"] = "Volunteers";
+    var role = Context.Session.GetString("Role") ?? "";
+    var isAdmin = role == "Admin";
 }
 
 <div style="margin-bottom:24px;">
@@ -65,7 +67,10 @@
                         </td>
                         <td style="padding:14px 8px; font-style:italic;">@(v.CurrentMission ?? "Idle / Available")</td>
                         <td style="padding:14px 8px; text-align:right;">
-                            <a asp-action="Details" asp-route-id="@v.VolunteerId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px;">Mission log</a>
+                            @if (isAdmin)
+                            {
+                                <a asp-action="Details" asp-route-id="@v.VolunteerId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px;">Mission log</a>
+                            }
                         </td>
                     </tr>
                 }

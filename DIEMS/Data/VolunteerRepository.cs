@@ -137,7 +137,7 @@ namespace DIEMS.Data
                 JOIN VOLUNTEERS v ON va.VOLUNTEER_ID = v.VOLUNTEER_ID
                 JOIN DISASTERS d ON va.DISASTER_ID = d.DISASTER_ID
                 WHERE va.VOLUNTEER_ID = :id
-                ORDER BY va.ASSIGNED_DATE DESC";
+                ORDER BY va.ASSIGNMENT_DATE DESC";
 
             var dt = _db.ExecuteQuery(sql, new OracleParameter("id", volunteerId));
             foreach (DataRow row in dt.Rows)
@@ -149,7 +149,7 @@ namespace DIEMS.Data
                     DisasterId = Convert.ToInt32(row["DISASTER_ID"]),
                     TaskName = row["TASK_NAME"].ToString(),
                     Description = row["DESCRIPTION"] == DBNull.Value ? null : row["DESCRIPTION"].ToString(),
-                    AssignedDate = Convert.ToDateTime(row["ASSIGNED_DATE"]),
+                    AssignedDate = Convert.ToDateTime(row["ASSIGNMENT_DATE"]),
                     Status = row["STATUS"].ToString(),
                     HoursWorked = Convert.ToInt32(row["HOURS_WORKED"]),
                     SupervisorName = row["SUPERVISOR_NAME"] == DBNull.Value ? null : row["SUPERVISOR_NAME"].ToString(),
@@ -164,7 +164,7 @@ namespace DIEMS.Data
         public bool InsertAssignment(VolunteerAssignment a)
         {
             string sql = @"
-                INSERT INTO VOLUNTEER_ASSIGNMENTS (VOLUNTEER_ID, DISASTER_ID, TASK_NAME, DESCRIPTION, ASSIGNED_DATE, STATUS, HOURS_WORKED, SUPERVISOR_NAME, SUPERVISOR_CONTACT)
+                INSERT INTO VOLUNTEER_ASSIGNMENTS (VOLUNTEER_ID, DISASTER_ID, TASK_NAME, DESCRIPTION, ASSIGNMENT_DATE, STATUS, HOURS_WORKED, SUPERVISOR_NAME, SUPERVISOR_CONTACT)
                 VALUES (:volunteerId, :disasterId, :taskName, :desc, SYSTIMESTAMP, 'Active', 0, :supName, :supContact)";
 
             int rows = _db.ExecuteNonQuery(sql,

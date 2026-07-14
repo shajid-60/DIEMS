@@ -22,10 +22,18 @@ namespace DIEMS.Controllers
             return HttpContext.Session.GetInt32("UserId") != null;
         }
 
+        private string GetRole()
+        {
+            return HttpContext.Session.GetString("Role") ?? "";
+        }
+
         [HttpGet]
         public IActionResult Index(string status, string sort)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Official") return RedirectToAction("AccessDenied", "Home");
+
             var list = _repo.GetFilteredVolunteers(status, sort);
             ViewBag.CurrentStatus = status ?? "ALL";
             ViewBag.CurrentSort = sort ?? "LATEST";
@@ -36,6 +44,8 @@ namespace DIEMS.Controllers
         public IActionResult Details(int id)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
+
             var v = _repo.GetVolunteerById(id);
             if (v == null) return NotFound();
 
@@ -49,6 +59,7 @@ namespace DIEMS.Controllers
         public IActionResult Create(Volunteer v)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
             
             ModelState.Remove("VolunteerId");
             ModelState.Remove("CreatedAt");
@@ -66,6 +77,8 @@ namespace DIEMS.Controllers
         public IActionResult Assign(VolunteerAssignment assignment)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
+
             if (ModelState.IsValid)
             {
                 _repo.InsertAssignment(assignment);

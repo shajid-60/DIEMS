@@ -22,6 +22,11 @@ namespace DIEMS.Controllers
             return HttpContext.Session.GetInt32("UserId") != null;
         }
 
+        private string GetRole()
+        {
+            return HttpContext.Session.GetString("Role") ?? "";
+        }
+
         [HttpGet]
         public IActionResult Index(string status, string sort)
         {
@@ -52,6 +57,7 @@ namespace DIEMS.Controllers
         public IActionResult Create()
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
             return View();
         }
 
@@ -59,6 +65,8 @@ namespace DIEMS.Controllers
         public IActionResult Create(Shelter s)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
+
             s.CreatedBy = HttpContext.Session.GetInt32("UserId");
             
             ModelState.Remove("ShelterId");
@@ -76,6 +84,9 @@ namespace DIEMS.Controllers
         public IActionResult CheckIn(ShelterResident resident)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
+
             resident.CheckedInBy = HttpContext.Session.GetInt32("UserId");
 
             if (ModelState.IsValid)
@@ -100,6 +111,9 @@ namespace DIEMS.Controllers
         public IActionResult CheckOut(int srId, int shelterId)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
+
             int userId = HttpContext.Session.GetInt32("UserId") ?? 1;
 
             _repo.CheckOutResident(srId, userId);

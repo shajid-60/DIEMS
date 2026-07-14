@@ -1,6 +1,10 @@
 @model Dictionary<string, object>
 @{
     ViewData["Title"] = "Dashboard";
+    var role = Context.Session.GetString("Role") ?? "";
+    var isAdmin = role == "Admin";
+    var isOfficial = role == "Official";
+    var isResponder = role == "Responder";
 }
 
 <style>
@@ -132,9 +136,24 @@
         <div class="glass-card" style="border-radius: var(--radius-lg); padding: 24px;">
             <h3 style="font-size: 16px; font-weight: 700; color: var(--text-highlight); margin-bottom: 16px;">Quick Actions</h3>
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <a asp-controller="Disaster" asp-action="Create" class="btn btn-primary" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">📝 Register New Disaster</a>
-                <a asp-controller="Victim" asp-action="Create" class="btn btn-outline" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">👤 Register Displaced Victim</a>
-                <a asp-controller="Resource" asp-action="Index" class="btn btn-outline" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">📦 Dispatch Emergency Relief</a>
+                @if (isAdmin)
+                {
+                    <a asp-controller="Disaster" asp-action="Create" class="btn btn-primary" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">📝 Register New Disaster</a>
+                    <a asp-controller="Victim" asp-action="Create" class="btn btn-outline" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">👤 Register Displaced Victim</a>
+                    <a asp-controller="Resource" asp-action="Index" class="btn btn-outline" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">📦 Dispatch Emergency Relief</a>
+                }
+                else if (isOfficial)
+                {
+                    <a asp-controller="Disaster" asp-action="Index" class="btn btn-primary" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">🌍 Monitor Active Disasters</a>
+                    <a asp-controller="Report" asp-action="Index" class="btn btn-outline" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">📋 Review Incident Reports</a>
+                    <a asp-controller="Analytics" asp-action="Index" class="btn btn-outline" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">📊 View Risk Analytics</a>
+                }
+                else if (isResponder)
+                {
+                    <a asp-controller="Victim" asp-action="Create" class="btn btn-primary" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">👤 Register Displaced Victim</a>
+                    <a asp-controller="Resource" asp-action="Index" class="btn btn-outline" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">📦 Dispatch Emergency Relief</a>
+                    <a asp-controller="Shelter" asp-action="Index" class="btn btn-outline" style="text-decoration: none; text-align: center; font-size: 13.5px; padding: 12px; transition: transform 0.2s;">🏠 Manage Shelters</a>
+                }
             </div>
         </div>
 

@@ -87,6 +87,16 @@ namespace DIEMS.Controllers
             return View(stats);
         }
 
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            if (HttpContext.Session.GetInt32("UserId") == null)
+            {
+                return RedirectToAction("Login");
+            }
+            return View("~/Views/Shared/AccessDenied.cshtml");
+        }
+
         private string ComputeSha256(string rawData)
         {
             using (SHA256 sha256Hash = SHA256.Create())

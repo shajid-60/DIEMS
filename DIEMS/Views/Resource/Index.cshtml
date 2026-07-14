@@ -3,6 +3,9 @@
     var resources = (List<DIEMS.Models.Resource>)ViewBag.Resources;
     var critical = (List<DIEMS.Models.Resource>)ViewBag.Critical;
     var distributionLog = (List<DIEMS.Models.ResourceDistribution>)ViewBag.DistributionLog;
+    var role = Context.Session.GetString("Role") ?? "";
+    var isAdmin = role == "Admin";
+    var isResponder = role == "Responder";
 }
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
@@ -10,7 +13,10 @@
         <h1 style="font-size:24px; font-weight:800; color:var(--text-highlight);">Emergency Resource Inventory</h1>
         <p style="font-size:13px; color:var(--text-muted);">Stock level tracking, critical alerts, and logistics distribution</p>
     </div>
-    <a asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Add Resource Stock</a>
+    @if (isAdmin)
+    {
+        <a asp-action="Create" class="btn btn-primary" style="text-decoration:none;">Add Resource Stock</a>
+    }
 </div>
 
 @if (TempData["SuccessMessage"] != null)
@@ -89,7 +95,10 @@
                                 / @r.TotalQuantity @r.Unit
                             </td>
                             <td style="padding: 12px 8px; text-align:right;">
+                            @if (isAdmin || isResponder)
+                            {
                                 <a asp-action="Distribute" asp-route-id="@r.ResourceId" class="btn btn-outline btn-sm" style="text-decoration:none; padding:4px 10px; font-size:12px; border-color:var(--status-green)55; color:var(--status-green);">Dispatch</a>
+                            }
                             </td>
                         </tr>
                     }

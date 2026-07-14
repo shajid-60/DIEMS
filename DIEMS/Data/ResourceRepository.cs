@@ -175,7 +175,18 @@ namespace DIEMS.Data
 
                 cmd.ExecuteNonQuery();
 
-                int distId = paramDistId.Value != DBNull.Value ? Convert.ToInt32(paramDistId.Value) : -1;
+                int distId = -1;
+                if (paramDistId.Value != DBNull.Value)
+                {
+                    if (paramDistId.Value is Oracle.ManagedDataAccess.Types.OracleDecimal oracleDecimal)
+                    {
+                        distId = oracleDecimal.ToInt32();
+                    }
+                    else
+                    {
+                        distId = Convert.ToInt32(paramDistId.Value);
+                    }
+                }
                 string msg = paramMsg.Value != DBNull.Value ? paramMsg.Value.ToString() : "Completed";
 
                 return (distId, msg);
