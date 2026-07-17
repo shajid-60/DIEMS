@@ -52,7 +52,7 @@ namespace DIEMS.Controllers
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
             if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
 
-            ViewBag.Categories = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_repo.GetResourceCategories(), "CategoryId", "CategoryName");
+            ViewBag.Categories = _repo.GetResourceCategories();
             return View();
         }
 
@@ -70,7 +70,7 @@ namespace DIEMS.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.Categories = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_repo.GetResourceCategories(), "CategoryId", "CategoryName");
+            ViewBag.Categories = _repo.GetResourceCategories();
             return View(r);
         }
 

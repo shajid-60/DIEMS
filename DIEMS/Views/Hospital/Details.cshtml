@@ -60,26 +60,35 @@
                 <input type="hidden" name="HospitalId" value="@Model.HospitalId" />
 
                 <div class="form-group" style="margin-bottom:12px;">
-                    <label style="font-size:11px; color:var(--text-muted);">Patient Name</label>
-                    <input type="text" name="PatientName" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" placeholder="e.g. Robin Mia" />
+                    <label style="font-size:11px; color:var(--text-muted);">Request Details (Patient Name / Needs)</label>
+                    <input type="text" name="RequestDetails" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" placeholder="e.g. Robin Mia" />
                 </div>
 
                 <div class="form-group" style="margin-bottom:12px;">
-                    <label style="font-size:11px; color:var(--text-muted);">Required Medical Specialty</label>
-                    <input type="text" name="RequiredSpecialty" placeholder="e.g. General Surgery" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+                    <label style="font-size:11px; color:var(--text-muted);">Request Type</label>
+                    <select name="RequestType" required style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                        <option value="Doctors">Doctors</option>
+                        <option value="Blood">Blood</option>
+                        <option value="Equipment">Equipment</option>
+                        <option value="Medicine">Medicine</option>
+                        <option value="Ambulance">Ambulance</option>
+                        <option value="ICU Bed">ICU Bed</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
                     <div class="form-group">
                         <label style="font-size:11px; color:var(--text-muted);">Blood Group</label>
-                        <input type="text" name="BloodGroupNeeded" placeholder="e.g. O-" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
+                        <input type="text" name="BloodGroup" placeholder="e.g. O-" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;" />
                     </div>
                     <div class="form-group">
                         <label style="font-size:11px; color:var(--text-muted);">Urgency Level</label>
-                        <select name="UrgencyLevel" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
+                        <select name="Priority" style="padding:8px 10px; font-size:13px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:4px; width:100%; color:white;">
                             <option value="Normal">Normal</option>
                             <option value="High">High</option>
-                            <option value="Immediate">Immediate</option>
+                            <option value="Critical">Critical</option>
+                            <option value="Emergency">Emergency</option>
                         </select>
                     </div>
                 </div>

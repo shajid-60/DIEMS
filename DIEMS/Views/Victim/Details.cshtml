@@ -3,10 +3,13 @@
     ViewData["Title"] = "Victim Info - " + Model.FullName;
 }
 
-<div style="margin-bottom: 24px;">
-    <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Registry</a>
-    <h1 style="font-size:26px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Victim Record: @Model.FullName</h1>
-    <p style="font-size:13px; color:var(--text-muted);">Registered by @Model.RegisteredByName on @Model.RegisteredAt.ToString("yyyy-MM-dd HH:mm")</p>
+<div style="margin-bottom: 24px; display:flex; justify-content:space-between; align-items:flex-start;">
+    <div>
+        <a asp-action="Index" style="color:var(--text-muted); font-size:13px; text-decoration:none;">← Back to Registry</a>
+        <h1 style="font-size:26px; font-weight:800; color:var(--text-highlight); margin-top:8px;">Victim Record: @Model.FullName</h1>
+        <p style="font-size:13px; color:var(--text-muted);">Registered by @Model.RegisteredByName on @Model.RegisteredAt.ToString("yyyy-MM-dd HH:mm")</p>
+    </div>
+    <a asp-action="Edit" asp-route-id="@Model.VictimId" class="btn btn-primary" style="text-decoration:none;">Edit Victim</a>
 </div>
 
 <div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px; margin-bottom:24px;">
@@ -71,13 +74,8 @@
             
             @if (Model.ShelterId == null)
             {
-                <form method="post" asp-controller="Victim" asp-action="Edit">
-                    <input type="hidden" name="VictimId" value="@Model.VictimId" />
-                    <input type="hidden" name="FullName" value="@Model.FullName" />
-                    <input type="hidden" name="Gender" value="@Model.Gender" />
-                    <input type="hidden" name="DisasterId" value="@Model.DisasterId" />
-                    <input type="hidden" name="MedicalCondition" value="@Model.MedicalCondition" />
-                    <input type="hidden" name="Status" value="Sheltered" />
+                <form method="post" asp-controller="Victim" asp-action="AutoAllocateShelter">
+                    <input type="hidden" name="victimId" value="@Model.VictimId" />
                     
                     <button type="submit" class="btn btn-primary" style="width:100%;">
                         Run Automated Shelter Allocation

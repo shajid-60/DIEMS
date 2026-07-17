@@ -518,7 +518,7 @@ input, select, textarea {
 }
 
 .user-info-mini { flex: 1; min-width: 0; }
-.user-name-mini { font-size: 13px; font-weight: 600; truncate; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-name-mini { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-role-mini { font-size: 11px; color: var(--text-muted); }
 
 /* ── Buttons ──────────────────────────────────────────────── */

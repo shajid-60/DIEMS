@@ -55,22 +55,45 @@ namespace DIEMS.Controllers
             return View(v);
         }
 
+        [HttpGet]
+        public IActionResult Create()
+        {
+            if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
+            
+            return View();
+        }
+
         [HttpPost]
         public IActionResult Create(Volunteer v)
         {
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
             if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
             
+            // If the Admin is registering themselves (e.g. from the Admin checkbox), set the UserId
+            if (Request.Form["RegisterAsSelf"] == "true")
+            {
+                v.UserId = HttpContext.Session.GetInt32("UserId") ?? 0;
+            }
+
             ModelState.Remove("VolunteerId");
             ModelState.Remove("CreatedAt");
             ModelState.Remove("Username");
             ModelState.Remove("Email");
+            ModelState.Remove("UserId");
+            ModelState.Remove("TotalHoursServed");
+            ModelState.Remove("CurrentMission");
+            ModelState.Remove("BloodGroup");
             
             if (ModelState.IsValid)
             {
                 _repo.InsertVolunteer(v);
+                TempData["SuccessMessage"] = "Volunteer registered successfully!";
+                return RedirectToAction("Index");
             }
-            return RedirectToAction("Index");
+            
+            // If we get here, model state is invalid. Let's return the view so we can see the validation summary.
+            return View(v);
         }
 
         [HttpPost]
@@ -79,11 +102,31 @@ namespace DIEMS.Controllers
             if (!CheckAuth()) return RedirectToAction("Login", "Home");
             if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
 
+            int assignedByUserId = HttpContext.Session.GetInt32("UserId") ?? 1;
+
             if (ModelState.IsValid)
             {
-                _repo.InsertAssignment(assignment);
+                _repo.InsertAssignment(assignment, assignedByUserId);
             }
             return RedirectToAction("Details", new { id = assignment.VolunteerId });
+        }
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Home");
+
+            bool success = _repo.DeleteVolunteer(id);
+            if (success)
+            {
+                TempData["SuccessMessage"] = "Volunteer deleted successfully!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to delete volunteer. They might have active assignments.";
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

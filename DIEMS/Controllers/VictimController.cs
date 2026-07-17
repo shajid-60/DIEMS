@@ -90,7 +90,18 @@ namespace DIEMS.Controllers
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine("INSERT EXCEPTION: " + ex.ToString());
                     ModelState.AddModelError("", "Database Error: " + ex.Message);
+                }
+            }
+            else
+            {
+                foreach (var state in ModelState)
+                {
+                    foreach (var err in state.Value.Errors)
+                    {
+                        Console.WriteLine("MODEL ERROR: " + state.Key + " -> " + err.ErrorMessage);
+                    }
                 }
             }
 
@@ -153,6 +164,20 @@ namespace DIEMS.Controllers
                 _repo.InsertFamilyMember(member);
             }
             return RedirectToAction("Details", new { id = member.VictimId });
+        }
+        [HttpPost]
+        public IActionResult AutoAllocateShelter(int victimId)
+        {
+            if (!CheckAuth()) return RedirectToAction("Login", "Home");
+            var role = GetRole();
+            if (role != "Admin" && role != "Responder") return RedirectToAction("AccessDenied", "Home");
+
+            var v = _repo.GetVictimById(victimId);
+            if (v != null && v.ShelterId == null)
+            {
+                _repo.RunAllocateShelterProcedure(victimId, v.DisasterId);
+            }
+            return RedirectToAction("Details", new { id = victimId });
         }
     }
 }

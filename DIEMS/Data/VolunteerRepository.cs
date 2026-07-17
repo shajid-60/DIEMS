@@ -22,34 +22,32 @@ namespace DIEMS.Data
 
         public List<Volunteer> GetFilteredVolunteers(string status, string sort)
         {
-            var list = new List<Volunteer>();
-            
-            using (var conn = _db.GetConnection())
-            using (var cmd = new OracleCommand("GET_FILTERED_VOLUNTEERS", conn))
+            string sql = @"
+                SELECT v.*, u.USERNAME, u.EMAIL,
+                       (SELECT MAX(TASK_TITLE) KEEP (DENSE_RANK LAST ORDER BY START_DATE) FROM VOLUNTEER_ASSIGNMENTS a WHERE a.VOLUNTEER_ID = v.VOLUNTEER_ID AND a.STATUS = 'Active') AS CURRENT_MISSION
+                FROM VOLUNTEERS v
+                LEFT JOIN USERS u ON v.USER_ID = u.USER_ID
+                WHERE 1=1";
+
+            if (!string.IsNullOrEmpty(status) && status != "ALL")
             {
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                sql += " AND v.AVAILABILITY = '" + status.Replace("'", "''") + "'";
+            }
 
-                var pCursor = new OracleParameter("v_cursor", OracleDbType.RefCursor);
-                pCursor.Direction = System.Data.ParameterDirection.ReturnValue;
-                cmd.Parameters.Add(pCursor);
+            if (sort == "HOURS")
+            {
+                sql += " ORDER BY v.TOTAL_MISSIONS DESC, v.CREATED_AT DESC";
+            }
+            else
+            {
+                sql += " ORDER BY v.CREATED_AT DESC";
+            }
 
-                var pStatus = new OracleParameter("p_status", OracleDbType.Varchar2);
-                pStatus.Value = string.IsNullOrEmpty(status) ? "ALL" : status;
-                cmd.Parameters.Add(pStatus);
-
-                var pSort = new OracleParameter("p_sort", OracleDbType.Varchar2);
-                pSort.Value = string.IsNullOrEmpty(sort) ? "LATEST" : sort;
-                cmd.Parameters.Add(pSort);
-                
-                using (var reader = cmd.ExecuteReader())
-                {
-                    var dt = new System.Data.DataTable();
-                    dt.Load(reader);
-                    foreach (System.Data.DataRow row in dt.Rows)
-                    {
-                        list.Add(MapVolunteer(row));
-                    }
-                }
+            var dt = _db.ExecuteQuery(sql);
+            var list = new List<Volunteer>();
+            foreach (System.Data.DataRow row in dt.Rows)
+            {
+                list.Add(MapVolunteer(row));
             }
             return list;
         }
@@ -57,9 +55,10 @@ namespace DIEMS.Data
         public Volunteer GetVolunteerById(int id)
         {
             string sql = @"
-                SELECT v.*, u.USERNAME, u.EMAIL
+                SELECT v.*, u.USERNAME, u.EMAIL,
+                       (SELECT MAX(TASK_TITLE) KEEP (DENSE_RANK LAST ORDER BY START_DATE) FROM VOLUNTEER_ASSIGNMENTS a WHERE a.VOLUNTEER_ID = v.VOLUNTEER_ID AND a.STATUS = 'Active') AS CURRENT_MISSION
                 FROM VOLUNTEERS v
-                JOIN USERS u ON v.USER_ID = u.USER_ID
+                LEFT JOIN USERS u ON v.USER_ID = u.USER_ID
                 WHERE v.VOLUNTEER_ID = :id";
 
             var dt = _db.ExecuteQuery(sql, new OracleParameter("id", id));
@@ -93,7 +92,7 @@ namespace DIEMS.Data
                 VALUES (:userId, :name, :phone, :skills, :status, :district, 0, :hours, :emergency)";
 
             int rows = _db.ExecuteNonQuery(sql,
-                new OracleParameter("userId", v.UserId),
+                new OracleParameter("userId", v.UserId == 0 ? (object)DBNull.Value : v.UserId),
                 new OracleParameter("name", v.FullName),
                 new OracleParameter("phone", v.Phone ?? (object)DBNull.Value),
                 new OracleParameter("skills", v.SkillSet ?? (object)DBNull.Value),
@@ -132,12 +131,13 @@ namespace DIEMS.Data
         {
             var list = new List<VolunteerAssignment>();
             string sql = @"
-                SELECT va.*, v.FULL_NAME AS VOLUNTEER_NAME, d.DISASTER_NAME
+                SELECT va.*, v.FULL_NAME AS VOLUNTEER_NAME, d.DISASTER_NAME, u.FULL_NAME AS SUPERVISOR_NAME, u.PHONE AS SUPERVISOR_CONTACT
                 FROM VOLUNTEER_ASSIGNMENTS va
                 JOIN VOLUNTEERS v ON va.VOLUNTEER_ID = v.VOLUNTEER_ID
                 JOIN DISASTERS d ON va.DISASTER_ID = d.DISASTER_ID
+                LEFT JOIN USERS u ON va.ASSIGNED_BY = u.USER_ID
                 WHERE va.VOLUNTEER_ID = :id
-                ORDER BY va.ASSIGNMENT_DATE DESC";
+                ORDER BY va.START_DATE DESC";
 
             var dt = _db.ExecuteQuery(sql, new OracleParameter("id", volunteerId));
             foreach (DataRow row in dt.Rows)
@@ -147,11 +147,11 @@ namespace DIEMS.Data
                     AssignmentId = Convert.ToInt32(row["ASSIGNMENT_ID"]),
                     VolunteerId = Convert.ToInt32(row["VOLUNTEER_ID"]),
                     DisasterId = Convert.ToInt32(row["DISASTER_ID"]),
-                    TaskName = row["TASK_NAME"].ToString(),
-                    Description = row["DESCRIPTION"] == DBNull.Value ? null : row["DESCRIPTION"].ToString(),
-                    AssignedDate = Convert.ToDateTime(row["ASSIGNMENT_DATE"]),
+                    TaskName = row["TASK_TITLE"].ToString(),
+                    Description = row["TASK_DESCRIPTION"] == DBNull.Value ? null : row["TASK_DESCRIPTION"].ToString(),
+                    AssignedDate = Convert.ToDateTime(row["START_DATE"]),
                     Status = row["STATUS"].ToString(),
-                    HoursWorked = Convert.ToInt32(row["HOURS_WORKED"]),
+                    HoursWorked = 0,
                     SupervisorName = row["SUPERVISOR_NAME"] == DBNull.Value ? null : row["SUPERVISOR_NAME"].ToString(),
                     SupervisorContact = row["SUPERVISOR_CONTACT"] == DBNull.Value ? null : row["SUPERVISOR_CONTACT"].ToString(),
                     VolunteerName = row["VOLUNTEER_NAME"].ToString(),
@@ -161,19 +161,21 @@ namespace DIEMS.Data
             return list;
         }
 
-        public bool InsertAssignment(VolunteerAssignment a)
+        public bool InsertAssignment(VolunteerAssignment a, int assignedByUserId)
         {
             string sql = @"
-                INSERT INTO VOLUNTEER_ASSIGNMENTS (VOLUNTEER_ID, DISASTER_ID, TASK_NAME, DESCRIPTION, ASSIGNMENT_DATE, STATUS, HOURS_WORKED, SUPERVISOR_NAME, SUPERVISOR_CONTACT)
-                VALUES (:volunteerId, :disasterId, :taskName, :desc, SYSTIMESTAMP, 'Active', 0, :supName, :supContact)";
+                INSERT INTO VOLUNTEER_ASSIGNMENTS (VOLUNTEER_ID, DISASTER_ID, TASK_TITLE, TASK_DESCRIPTION, START_DATE, STATUS, ASSIGNED_BY)
+                VALUES (:volunteerId, :disasterId, :taskName, :taskDesc, SYSTIMESTAMP, 'Active', :assignedBy)";
 
             int rows = _db.ExecuteNonQuery(sql,
                 new OracleParameter("volunteerId", a.VolunteerId),
                 new OracleParameter("disasterId", a.DisasterId),
                 new OracleParameter("taskName", a.TaskName),
-                new OracleParameter("desc", a.Description ?? (object)DBNull.Value),
-                new OracleParameter("supName", a.SupervisorName ?? (object)DBNull.Value),
-                new OracleParameter("supContact", a.SupervisorContact ?? (object)DBNull.Value));
+                new OracleParameter("taskDesc", a.Description ?? (object)DBNull.Value),
+                new OracleParameter("assignedBy", assignedByUserId));
+
+            // Mark volunteer as assigned
+            _db.ExecuteNonQuery("UPDATE VOLUNTEERS SET AVAILABILITY = 'Assigned' WHERE VOLUNTEER_ID = :id", new OracleParameter("id", a.VolunteerId));
 
             return rows > 0;
         }
@@ -189,7 +191,7 @@ namespace DIEMS.Data
                 SkillSet = row["LANGUAGES"] == DBNull.Value ? null : row["LANGUAGES"].ToString(),
                 AvailabilityStatus = row["AVAILABILITY"].ToString(),
                 District = row["DISTRICT"] == DBNull.Value ? null : row["DISTRICT"].ToString(),
-                CurrentMission = row["ORGANIZATION"] == DBNull.Value ? null : row["ORGANIZATION"].ToString(),
+                CurrentMission = row.Table.Columns.Contains("CURRENT_MISSION") && row["CURRENT_MISSION"] != DBNull.Value ? row["CURRENT_MISSION"].ToString() : null,
                 TotalHoursServed = Convert.ToInt32(row["TOTAL_MISSIONS"]),
                 BloodGroup = null,
                 EmergencyContact = row["EMERGENCY_CONTACT"] == DBNull.Value ? null : row["EMERGENCY_CONTACT"].ToString(),
@@ -197,6 +199,22 @@ namespace DIEMS.Data
                 Username = row.Table.Columns.Contains("USERNAME") && row["USERNAME"] != DBNull.Value ? row["USERNAME"].ToString() : null,
                 Email = row["EMAIL"] == DBNull.Value ? null : row["EMAIL"].ToString()
             };
+        }
+        
+        public bool DeleteVolunteer(int id)
+        {
+            try
+            {
+                // First delete related assignments to avoid FK constraint error
+                _db.ExecuteNonQuery("DELETE FROM VOLUNTEER_ASSIGNMENTS WHERE VOLUNTEER_ID = :id", new OracleParameter("id", id));
+                
+                int rows = _db.ExecuteNonQuery("DELETE FROM VOLUNTEERS WHERE VOLUNTEER_ID = :id", new OracleParameter("id", id));
+                return rows > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

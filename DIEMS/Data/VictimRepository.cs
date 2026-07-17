@@ -90,7 +90,7 @@ namespace DIEMS.Data
                                     :shelterId, :medCond, :bloodGroup, :status, :registeredBy)
                             RETURNING VICTIM_ID INTO :newId";
 
-                        var paramNewId = new OracleParameter("newId", OracleDbType.Int32, ParameterDirection.ReturnValue);
+                        var paramNewId = new OracleParameter("newId", OracleDbType.Int32, ParameterDirection.Output);
 
                         using (var cmd = new OracleCommand(sql, conn))
                         {
@@ -115,7 +115,15 @@ namespace DIEMS.Data
                             cmd.ExecuteNonQuery();
                         }
 
-                        int newVictimId = Convert.ToInt32(paramNewId.Value);
+                        int newVictimId;
+                        if (paramNewId.Value is Array arr && arr.Length > 0)
+                        {
+                            newVictimId = Convert.ToInt32(arr.GetValue(0).ToString());
+                        }
+                        else
+                        {
+                            newVictimId = Convert.ToInt32(paramNewId.Value.ToString());
+                        }
 
                         // If auto-allocating shelter and shelter was not set manually, run procedure
                         if (autoAllocateShelter && v.ShelterId == null)
@@ -126,6 +134,15 @@ namespace DIEMS.Data
                                 cmdProc.CommandType = CommandType.StoredProcedure;
                                 cmdProc.Parameters.Add("p_victim_id", OracleDbType.Int32).Value = newVictimId;
                                 cmdProc.Parameters.Add("p_disaster_id", OracleDbType.Int32).Value = v.DisasterId;
+                                
+                                var outRes = new OracleParameter("p_result", OracleDbType.Int32);
+                                outRes.Direction = ParameterDirection.Output;
+                                cmdProc.Parameters.Add(outRes);
+
+                                var outMsg = new OracleParameter("p_message", OracleDbType.Varchar2, 500);
+                                outMsg.Direction = ParameterDirection.Output;
+                                cmdProc.Parameters.Add(outMsg);
+
                                 cmdProc.ExecuteNonQuery();
                             }
                         }
@@ -245,6 +262,26 @@ namespace DIEMS.Data
                 ShelterName = row["SHELTER_NAME"] == DBNull.Value ? "None Assigned" : row["SHELTER_NAME"].ToString(),
                 RegisteredByName = row["REGISTERED_BY_NAME"] == DBNull.Value ? "System" : row["REGISTERED_BY_NAME"].ToString()
             };
+        }
+        public void RunAllocateShelterProcedure(int victimId, int disasterId)
+        {
+            using (var conn = _db.GetConnection())
+            using (var cmdProc = new OracleCommand("ALLOCATE_SHELTER", conn))
+            {
+                cmdProc.CommandType = CommandType.StoredProcedure;
+                cmdProc.Parameters.Add("p_victim_id", OracleDbType.Int32).Value = victimId;
+                cmdProc.Parameters.Add("p_disaster_id", OracleDbType.Int32).Value = disasterId;
+
+                var outRes = new OracleParameter("p_result", OracleDbType.Int32);
+                outRes.Direction = ParameterDirection.Output;
+                cmdProc.Parameters.Add(outRes);
+
+                var outMsg = new OracleParameter("p_message", OracleDbType.Varchar2, 500);
+                outMsg.Direction = ParameterDirection.Output;
+                cmdProc.Parameters.Add(outMsg);
+
+                cmdProc.ExecuteNonQuery();
+            }
         }
     }
 }

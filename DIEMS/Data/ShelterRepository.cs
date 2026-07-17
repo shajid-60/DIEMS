@@ -108,7 +108,7 @@ namespace DIEMS.Data
                                 :facilities, :medical, :generator, :wifi, 1, :createdBy)
                         RETURNING SHELTER_ID INTO :newId";
 
-                    var paramNewId = new OracleParameter("newId", OracleDbType.Int32, ParameterDirection.ReturnValue);
+                    var paramNewId = new OracleParameter("newId", OracleDbType.Int32, ParameterDirection.Output);
 
                     using (var cmd = new OracleCommand(sqlShelter, conn))
                     {
@@ -132,17 +132,28 @@ namespace DIEMS.Data
                         cmd.ExecuteNonQuery();
                     }
 
-                    int newShelterId = Convert.ToInt32(paramNewId.Value);
+                    int newShelterId;
+                    if (paramNewId.Value is Array arr && arr.Length > 0)
+                    {
+                        var firstItem = arr.GetValue(0);
+                        newShelterId = Convert.ToInt32(firstItem.ToString());
+                    }
+                    else
+                    {
+                        newShelterId = Convert.ToInt32(paramNewId.Value.ToString());
+                    }
 
                     string sqlCapacity = @"
                         INSERT INTO SHELTER_CAPACITY (SHELTER_ID, MAX_CAPACITY, CURRENT_OCCUPIED, AVAILABLE_BEDS, RESERVED_SPOTS, HAS_OVERFLOW, OVERFLOW_LOCATION)
-                        VALUES (:shelterId, :max, 0, :max, :reserved, :overflow, :overflowLoc)";
+                        VALUES (:shelterId, :max, 0, :max2, :reserved, :overflow, :overflowLoc)";
 
                     using (var cmdCap = new OracleCommand(sqlCapacity, conn))
                     {
                         cmdCap.Transaction = trans;
+                        cmdCap.BindByName = true;
                         cmdCap.Parameters.Add("shelterId", OracleDbType.Int32).Value = newShelterId;
                         cmdCap.Parameters.Add("max", OracleDbType.Int32).Value = s.MaxCapacity;
+                        cmdCap.Parameters.Add("max2", OracleDbType.Int32).Value = s.MaxCapacity;
                         cmdCap.Parameters.Add("reserved", OracleDbType.Int32).Value = s.ReservedSpots;
                         cmdCap.Parameters.Add("overflow", OracleDbType.Int16).Value = s.HasOverflow;
                         cmdCap.Parameters.Add("overflowLoc", OracleDbType.Varchar2).Value = (object)s.OverflowLocation ?? DBNull.Value;
@@ -203,14 +214,17 @@ namespace DIEMS.Data
                         UPDATE SHELTER_CAPACITY
                         SET MAX_CAPACITY = :max, RESERVED_SPOTS = :reserved, HAS_OVERFLOW = :overflow, 
                             OVERFLOW_LOCATION = :overflowLoc, 
-                            AVAILABLE_BEDS = :max - CURRENT_OCCUPIED - :reserved, LAST_UPDATED = SYSTIMESTAMP
+                            AVAILABLE_BEDS = :max2 - CURRENT_OCCUPIED - :reserved2, LAST_UPDATED = SYSTIMESTAMP
                         WHERE SHELTER_ID = :shelterId";
 
                     using (var cmdCap = new OracleCommand(sqlCapacity, conn))
                     {
                         cmdCap.Transaction = trans;
+                        cmdCap.BindByName = true;
                         cmdCap.Parameters.Add("max", OracleDbType.Int32).Value = s.MaxCapacity;
+                        cmdCap.Parameters.Add("max2", OracleDbType.Int32).Value = s.MaxCapacity;
                         cmdCap.Parameters.Add("reserved", OracleDbType.Int32).Value = s.ReservedSpots;
+                        cmdCap.Parameters.Add("reserved2", OracleDbType.Int32).Value = s.ReservedSpots;
                         cmdCap.Parameters.Add("overflow", OracleDbType.Int16).Value = s.HasOverflow;
                         cmdCap.Parameters.Add("overflowLoc", OracleDbType.Varchar2).Value = (object)s.OverflowLocation ?? DBNull.Value;
                         cmdCap.Parameters.Add("shelterId", OracleDbType.Int32).Value = s.ShelterId;
